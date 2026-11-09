@@ -1,0 +1,234 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1020" width="1400" height="1020" style="background:#081021; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E3A8A" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#111C35" />
+      <stop offset="100%" stop-color="#0D1527" />
+    </linearGradient>
+    <linearGradient id="actionIrrigate" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#0369A1" />
+    </linearGradient>
+    <linearGradient id="actionMonitor" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+    <linearGradient id="actionDelay" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#3730A3" />
+    </linearGradient>
+    <linearGradient id="actionNoAction" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="actionInsufficient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#DC2626" />
+      <stop offset="100%" stop-color="#991B1B" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Title Banner -->
+  <rect x="30" y="20" width="1340" height="70" rx="12" fill="url(#headerGrad)" filter="url(#shadow)"/>
+  <text x="50" y="52" fill="#FFFFFF" font-size="22" font-weight="bold" letter-spacing="0.5">FarmShield AI — Phase 5.2.5 Evidence-Grounded Decision Architecture</text>
+  <text x="50" y="74" fill="#BAE6FD" font-size="13">Deterministic Agronomic Decision Support System | PentaPrime AI &amp; Geospatial Engine</text>
+
+  <!-- Section 1: Inputs Layer -->
+  <g transform="translate(30, 110)">
+    <!-- Box 1: Water Balance -->
+    <rect x="0" y="0" width="310" height="85" rx="8" fill="url(#cardGrad)" stroke="#1E40AF" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="15" y="26" fill="#60A5FA" font-size="14" font-weight="bold">Phase 3: Water Balance</text>
+    <text x="15" y="48" fill="#94A3B8" font-size="12">Root-zone depletion Dr, RAW, TAW</text>
+    <text x="15" y="66" fill="#94A3B8" font-size="12">Transpiration reduction coefficient Ks</text>
+
+    <!-- Box 2: Multimodal Stress -->
+    <rect x="340" y="0" width="310" height="85" rx="8" fill="url(#cardGrad)" stroke="#1E40AF" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="355" y="26" fill="#60A5FA" font-size="14" font-weight="bold">Phase 4: Multimodal Stress</text>
+    <text x="355" y="48" fill="#94A3B8" font-size="12">Water, Vegetation, Weather &amp; Soil flags</text>
+    <text x="355" y="66" fill="#94A3B8" font-size="12">Isolated: Non-watering agronomic alerts</text>
+
+    <!-- Box 3: Weather Forecast Context -->
+    <rect x="680" y="0" width="330" height="85" rx="8" fill="url(#cardGrad)" stroke="#1E40AF" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="695" y="24" fill="#60A5FA" font-size="13" font-weight="bold">Weather Forecast &amp; ETc Window</text>
+    <text x="695" y="42" fill="#94A3B8" font-size="11">P_total vs P_eff | UTC-normalized timestamps</text>
+    <text x="695" y="58" fill="#94A3B8" font-size="11">Coverage: T_from &lt;= T_dec &amp; T_to &gt;= T_rain</text>
+    <text x="695" y="74" fill="#94A3B8" font-size="11">Non-extrapolation: rate bounded to valid window</text>
+
+    <!-- Box 4: Irrigation System Constraints -->
+    <rect x="1040" y="0" width="300" height="85" rx="8" fill="url(#cardGrad)" stroke="#1E40AF" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="1055" y="26" fill="#60A5FA" font-size="14" font-weight="bold">System &amp; Farm Context</text>
+    <text x="1055" y="48" fill="#94A3B8" font-size="12">Structured EfficiencyVerificationRecord required</text>
+    <text x="1055" y="66" fill="#94A3B8" font-size="12">Audit method, date, zone &amp; status | Area (ha)</text>
+  </g>
+
+  <!-- Connectors from Inputs to Decision Core -->
+  <path d="M 185 195 L 185 225 L 700 225 L 700 240" fill="none" stroke="#38BDF8" stroke-width="2" />
+  <path d="M 495 195 L 495 225" fill="none" stroke="#38BDF8" stroke-width="2" />
+  <path d="M 845 195 L 845 225" fill="none" stroke="#38BDF8" stroke-width="2" />
+  <path d="M 1190 195 L 1190 225 L 700 225" fill="none" stroke="#38BDF8" stroke-width="2" />
+
+  <!-- Section 2: Deterministic Rule Precedence Hierarchy -->
+  <g transform="translate(30, 240)">
+    <rect x="0" y="0" width="1340" height="260" rx="10" fill="#0E172A" stroke="#334155" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="28" fill="#F8FAFC" font-size="15" font-weight="bold">Deterministic Decision Rule Precedence Hierarchy</text>
+
+    <!-- Precedence 1 -->
+    <rect x="20" y="45" width="245" height="195" rx="8" fill="#1E1B4B" stroke="#4338CA" stroke-width="1"/>
+    <text x="32" y="68" fill="#A5B4FC" font-size="13" font-weight="bold">Precedence 1: Evidence Gating</text>
+    <text x="32" y="90" fill="#CBD5E1" font-size="11">• Water balance completeness</text>
+    <text x="32" y="108" fill="#CBD5E1" font-size="11">• Quality status (GOOD / PARTIAL)</text>
+    <text x="32" y="126" fill="#CBD5E1" font-size="11">• Staleness check (&lt; 3 days)</text>
+    <text x="32" y="144" fill="#CBD5E1" font-size="11">• Provisional empirical rainfall</text>
+    <text x="32" y="160" fill="#CBD5E1" font-size="11">  strictly blocked without opt-in</text>
+    <rect x="32" y="180" width="220" height="45" rx="6" fill="url(#actionInsufficient)"/>
+    <text x="142" y="200" fill="#FFFFFF" font-size="12" font-weight="bold" text-anchor="middle">INSUFFICIENT_DATA</text>
+    <text x="142" y="215" fill="#FECACA" font-size="10" text-anchor="middle">Priority: UNRANKED</text>
+
+    <!-- Precedence 2 -->
+    <rect x="285" y="45" width="245" height="195" rx="8" fill="#3B0764" stroke="#7E22CE" stroke-width="1"/>
+    <text x="297" y="68" fill="#E9D5FF" font-size="13" font-weight="bold">Precedence 2: Emergency Deficit</text>
+    <text x="297" y="90" fill="#CBD5E1" font-size="11">• Dr &gt;= TAW and Ks &lt;= 0.20</text>
+    <text x="297" y="108" fill="#CBD5E1" font-size="11">• Active permanent wilting hazard</text>
+    <text x="297" y="126" fill="#CBD5E1" font-size="11">• Immediate override precedence</text>
+    <text x="297" y="144" fill="#CBD5E1" font-size="11">• Overrides forecast &amp; delays</text>
+    <text x="297" y="160" fill="#CBD5E1" font-size="11">• Checks recent irrig contradiction</text>
+    <rect x="297" y="180" width="220" height="45" rx="6" fill="url(#actionIrrigate)"/>
+    <text x="407" y="200" fill="#FFFFFF" font-size="12" font-weight="bold" text-anchor="middle">EMERGENCY IRRIGATE</text>
+    <text x="407" y="215" fill="#BAE6FD" font-size="10" text-anchor="middle">Priority: CRITICAL</text>
+
+    <!-- Precedence 3 -->
+    <rect x="550" y="45" width="265" height="195" rx="8" fill="#172554" stroke="#1D4ED8" stroke-width="1"/>
+    <text x="562" y="66" fill="#93C5FD" font-size="13" font-weight="bold">Precedence 3: Safe Deferral</text>
+    <text x="562" y="83" fill="#CBD5E1" font-size="11">• 3A: Weather Rain Delay (ETc Window Guard)</text>
+    <text x="562" y="97" fill="#CBD5E1" font-size="10">  Dr &gt;= RAW: provisional delay blocked!</text>
+    <text x="562" y="111" fill="#FEF08A" font-size="10">  ETc window &lt; rain onset: BLOCKED (ETC_WINDOW)</text>
+    <text x="562" y="125" fill="#FEF08A" font-size="10">  t_rain &lt; t_stress + opt-in + valid window: DELAY</text>
+    <text x="562" y="139" fill="#CBD5E1" font-size="10">  Missing/Invalid ETc: delay denied -&gt; MONITOR</text>
+    <text x="562" y="153" fill="#CBD5E1" font-size="11">• 3B: Soil Redistribution (&lt; 24h)</text>
+    <rect x="562" y="180" width="240" height="45" rx="6" fill="url(#actionDelay)"/>
+    <text x="682" y="200" fill="#FFFFFF" font-size="12" font-weight="bold" text-anchor="middle">DELAY_AND_REASSESS</text>
+    <text x="682" y="215" fill="#C7D2FE" font-size="10" text-anchor="middle">12h Provisional Reassessment</text>
+
+    <!-- Precedence 4 -->
+    <rect x="835" y="45" width="245" height="195" rx="8" fill="#0C4A6E" stroke="#0284C7" stroke-width="1"/>
+    <text x="847" y="68" fill="#7DD3FC" font-size="13" font-weight="bold">Precedence 4: Standard Deficit</text>
+    <text x="847" y="90" fill="#CBD5E1" font-size="11">• Dr &gt;= RAW or Ks &lt; 1.00</text>
+    <text x="847" y="110" fill="#FEF08A" font-size="11">Economic Min Depth Gate:</text>
+    <text x="847" y="128" fill="#CBD5E1" font-size="11">  If Dr &lt; 5.0 mm -&gt; MONITOR</text>
+    <text x="847" y="146" fill="#CBD5E1" font-size="11">  If Dr &gt;= 5.0 mm -&gt; IRRIGATE</text>
+    <text x="847" y="164" fill="#CBD5E1" font-size="11">  (Refill back to Field Capacity)</text>
+    <rect x="847" y="180" width="220" height="45" rx="6" fill="url(#actionIrrigate)"/>
+    <text x="957" y="200" fill="#FFFFFF" font-size="12" font-weight="bold" text-anchor="middle">STANDARD IRRIGATE</text>
+    <text x="957" y="215" fill="#BAE6FD" font-size="10" text-anchor="middle">Priority: HIGH / CRITICAL</text>
+
+    <!-- Precedence 5 -->
+    <rect x="1100" y="45" width="220" height="195" rx="8" fill="#064E3B" stroke="#059669" stroke-width="1"/>
+    <text x="1112" y="68" fill="#A7F3D0" font-size="13" font-weight="bold">Precedence 5: Non-Deficit</text>
+    <text x="1112" y="90" fill="#CBD5E1" font-size="11">• 5A: Approaching RAW:</text>
+    <text x="1112" y="106" fill="#CBD5E1" font-size="11">  Dr &gt;= 0.80*RAW or sensitive</text>
+    <rect x="1112" y="112" width="195" height="32" rx="4" fill="url(#actionMonitor)"/>
+    <text x="1209" y="132" fill="#FFFFFF" font-size="11" font-weight="bold" text-anchor="middle">MONITOR (MEDIUM)</text>
+    
+    <text x="1112" y="160" fill="#CBD5E1" font-size="11">• 5B: Well-Watered Healthy:</text>
+    <text x="1112" y="176" fill="#CBD5E1" font-size="11">  Dr &lt; 0.80*RAW</text>
+    <rect x="1112" y="182" width="195" height="32" rx="4" fill="url(#actionNoAction)"/>
+    <text x="1209" y="202" fill="#FFFFFF" font-size="11" font-weight="bold" text-anchor="middle">NO_ACTION_REQUIRED</text>
+  </g>
+
+  <!-- Convergence Arrows from Emergency & Standard IRRIGATE into Quantity Validation -->
+  <path d="M 437 480 L 437 530 L 700 530 L 700 545" fill="none" stroke="#38BDF8" stroke-width="2.5" />
+  <path d="M 987 480 L 987 530 L 700 530" fill="none" stroke="#38BDF8" stroke-width="2.5" />
+
+  <!-- Section 3: Unified Quantity-Validation Pipeline -->
+  <g transform="translate(30, 545)">
+    <rect x="0" y="0" width="1340" height="230" rx="10" fill="#0F172A" stroke="#0284C7" stroke-width="2" filter="url(#shadow)"/>
+    <text x="20" y="26" fill="#38BDF8" font-size="15" font-weight="bold">Unified Quantity-Validation Pipeline (Shared across Emergency &amp; Standard IRRIGATE)</text>
+
+    <!-- Stage 1: Net Refill -->
+    <rect x="20" y="42" width="220" height="165" rx="6" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+    <text x="32" y="65" fill="#F1F5F9" font-size="13" font-weight="bold">1. Physical Net Depth</text>
+    <text x="32" y="90" fill="#94A3B8" font-size="11">d_net = Dr (mm)</text>
+    <text x="32" y="112" fill="#CBD5E1" font-size="11">Soil refill requirement to</text>
+    <text x="32" y="128" fill="#CBD5E1" font-size="11">restore root zone back to</text>
+    <text x="32" y="144" fill="#CBD5E1" font-size="11">Field Capacity.</text>
+    <text x="32" y="172" fill="#38BDF8" font-size="11" font-weight="bold">Reported independently</text>
+    <text x="32" y="188" fill="#38BDF8" font-size="11" font-weight="bold">even if eta is unknown.</text>
+
+    <!-- Arrow -->
+    <path d="M 245 125 L 275 125" fill="none" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Stage 2: Application Efficiency Provenance -->
+    <rect x="280" y="42" width="310" height="165" rx="6" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+    <text x="292" y="65" fill="#F1F5F9" font-size="13" font-weight="bold">2. Efficiency Verification Gate</text>
+    <text x="292" y="88" fill="#A7F3D0" font-size="11">✓ COMPLETE_MEASURED:</text>
+    <text x="445" y="88" fill="#CBD5E1" font-size="11">Verified audit record</text>
+    <text x="292" y="106" fill="#FDE047" font-size="11">⚠ OPERATOR (String only):</text>
+    <text x="445" y="106" fill="#CBD5E1" font-size="11">Unverified -&gt; PROVISIONAL</text>
+    <text x="292" y="124" fill="#FDE047" font-size="11">⚠ PROVIDER_SOURCED:</text>
+    <text x="445" y="124" fill="#CBD5E1" font-size="11">Provisional hardware spec</text>
+    <text x="292" y="142" fill="#FDE047" font-size="11">⚠ ASSUMED_DEFAULT:</text>
+    <text x="445" y="142" fill="#CBD5E1" font-size="11">Provisional FAO-56 benchmark</text>
+    <text x="292" y="160" fill="#F87171" font-size="11">✗ UNKNOWN:</text>
+    <text x="380" y="160" fill="#CBD5E1" font-size="11">Suppress d_gross &amp; volume!</text>
+    <text x="292" y="185" fill="#38BDF8" font-size="11" font-weight="bold">d_gross = d_net / eta (if eta known)</text>
+
+    <!-- Arrow -->
+    <path d="M 595 125 L 625 125" fill="none" stroke="#64748B" stroke-width="2" />
+
+    <!-- Stage 3: Split-Application Limits & Exact Arithmetic -->
+    <rect x="630" y="42" width="360" height="165" rx="6" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+    <text x="642" y="65" fill="#F1F5F9" font-size="13" font-weight="bold">3. Split-Application Exact Arithmetic</text>
+    <text x="642" y="86" fill="#CBD5E1" font-size="11">Bound: max_depth down-rounded (ROUND_FLOOR)</text>
+    <text x="642" y="102" fill="#94A3B8" font-size="11">Compared against original Decimal configured bound</text>
+    <text x="642" y="120" fill="#FEF08A" font-size="11">Exact Integer-Cent Ceiling Division:</text>
+    <text x="642" y="136" fill="#CBD5E1" font-size="11">• N = (cents + max_cents - 1) // max_cents</text>
+    <text x="642" y="152" fill="#CBD5E1" font-size="11">• Remainder distributed evenly (&lt;= 1 cent diff)</text>
+    <text x="642" y="170" fill="#4ADE80" font-size="11" font-weight="bold">✓ Every event &lt;= original max | Never rounded up</text>
+    <text x="642" y="186" fill="#4ADE80" font-size="11" font-weight="bold">✓ Sum(d_split) == d_gross | Zero-depth &amp; non-neg precision validated</text>
+
+    <!-- Arrow -->
+    <path d="M 995 125 L 1025 125" fill="none" stroke="#64748B" stroke-width="2" />
+
+    <!-- Stage 4: Volumetric Conversion -->
+    <rect x="1030" y="42" width="290" height="165" rx="6" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+    <text x="1042" y="65" fill="#F1F5F9" font-size="13" font-weight="bold">4. Volumetric Water Demand</text>
+    <text x="1042" y="90" fill="#CBD5E1" font-size="11">V = d_gross * Area_ha * 10 (m³)</text>
+    <text x="1042" y="115" fill="#FEF08A" font-size="11">Boundary Area Safeguard:</text>
+    <text x="1042" y="133" fill="#CBD5E1" font-size="11">If zone area is unrecorded:</text>
+    <text x="1042" y="151" fill="#F87171" font-size="11">• Volume strictly null (None)</text>
+    <text x="1042" y="169" fill="#F87171" font-size="11">• Farm total volume suppressed</text>
+    <text x="1042" y="190" fill="#94A3B8" font-size="10">(Prevents misleading partial sums)</text>
+  </g>
+
+  <!-- Section 4: Farm-Level Prioritization & Reliability Synthesis -->
+  <g transform="translate(30, 800)">
+    <rect x="0" y="0" width="1340" height="185" rx="10" fill="#0B132B" stroke="#1E293B" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="26" fill="#F8FAFC" font-size="15" font-weight="bold">Farm-Level Aggregation &amp; Volume Reliability Lifecycle</text>
+
+    <!-- Multi-Zone Urgency Ranking -->
+    <rect x="20" y="42" width="560" height="125" rx="6" fill="#111C38" stroke="#334155" stroke-width="1"/>
+    <text x="32" y="65" fill="#60A5FA" font-size="13" font-weight="bold">Hazard-First Prioritization Hierarchy</text>
+    <text x="32" y="88" fill="#CBD5E1" font-size="11">1. CRITICAL: Wilting hazard (Dr &gt;= TAW) or flowering stress</text>
+    <text x="32" y="106" fill="#CBD5E1" font-size="11">2. HIGH: Depletion exceeds RAW with active transpiration loss (Ks &lt; 1.0)</text>
+    <text x="32" y="124" fill="#CBD5E1" font-size="11">3. MEDIUM: Approaching RAW (Dr &gt;= 0.80*RAW) or sensitive crop stage</text>
+    <text x="32" y="142" fill="#CBD5E1" font-size="11">4. LOW: Well-watered healthy zones | 5. UNRANKED: Insufficient evidence</text>
+
+    <!-- Farm Decision Summary Status -->
+    <rect x="600" y="42" width="720" height="125" rx="6" fill="#111C38" stroke="#334155" stroke-width="1"/>
+    <text x="612" y="65" fill="#60A5FA" font-size="13" font-weight="bold">VolumeCalculationStatus Categories on FarmDecisionSummary</text>
+    <text x="612" y="88" fill="#4ADE80" font-size="11">• COMPLETE_MEASURED:</text>
+    <text x="785" y="88" fill="#CBD5E1" font-size="11">100% of irrigated zones have verified in-situ field measurement</text>
+    <text x="612" y="106" fill="#FDE047" font-size="11">• COMPLETE_PROVISIONAL:</text>
+    <text x="785" y="106" fill="#CBD5E1" font-size="11">Calculable, but 1+ zones use provisional efficiency (tracks provisional_zone_ids)</text>
+    <text x="612" y="124" fill="#F87171" font-size="11">• SUPPRESSED_MISSING_AREA:</text>
+    <text x="805" y="124" fill="#CBD5E1" font-size="11">Withheld because 1+ irrigated zones lack boundary polygon area</text>
+    <text x="612" y="142" fill="#F87171" font-size="11">• SUPPRESSED_UNKNOWN_EFF:</text>
+    <text x="805" y="142" fill="#CBD5E1" font-size="11">Withheld because 1+ irrigated zones lack efficiency value</text>
+    <text x="612" y="160" fill="#94A3B8" font-size="11">• ZERO_IRRIGATION: Zero zones require water application (total volume = 0.0 m³)</text>
+  </g>
+</svg>
