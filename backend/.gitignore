@@ -1,0 +1,12 @@
+# Python virtual environments & bytecode
+.venv/
+__pycache__/
+*.py[cod]
+
+# Environment variables
+.env
+
+# Testing cache
+.pytest_cache/
+.coverage
+htmlcov/

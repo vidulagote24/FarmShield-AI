@@ -1,0 +1,36 @@
+# FarmShield AI - Local PostgreSQL 16 + PostGIS 3.4 Infrastructure
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: farmshield_postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-farmshield_db}
+      POSTGRES_USER: ${POSTGRES_USER:-farmshield}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-farmshield_password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      # Bound strictly to loopback interface to prevent public exposure
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-postgis.sql:/docker-entrypoint-initdb.d/01-init-postgis.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-farmshield} -d ${POSTGRES_DB:-farmshield_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - farmshield_net
+
+volumes:
+  postgres_data:
+    name: farmshield_postgres_data
+    driver: local
+
+networks:
+  farmshield_net:
+    name: farmshield_network
+    driver: bridge
