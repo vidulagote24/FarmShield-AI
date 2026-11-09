@@ -50,10 +50,11 @@ export default function Irrigation({
     wait: {
       decision: t.irrigation.decisionWait,
       title: t.irrigation.statusWait,
-      badgeBg: '#FEF3C7',
-      badgeColor: '#B45309',
-      borderColor: '#FCD34D',
-      bgGradient: 'linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 100%)',
+      badgeBg: 'rgba(255, 195, 77, 0.22)',
+      badgeColor: '#FFC34D',
+      borderColor: 'rgba(255, 195, 77, 0.45)',
+      cardGlow: '0 0 24px rgba(255, 195, 77, 0.20)',
+      bgGradient: 'rgba(255, 195, 77, 0.08)',
       moisture: 64,
       moistureStatus: currentLang === 'mr' 
         ? '६४% (काळी कसदार माती - शाकीय वाढीसाठी अनुकूल)' 
@@ -103,10 +104,11 @@ export default function Irrigation({
     irrigate: {
       decision: t.irrigation.decisionIrrigate,
       title: t.irrigation.statusIrrigate,
-      badgeBg: '#DCFCE7',
-      badgeColor: '#15803D',
-      borderColor: '#86EFAC',
-      bgGradient: 'linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 100%)',
+      badgeBg: 'rgba(105, 217, 138, 0.22)',
+      badgeColor: '#69D98A',
+      borderColor: 'rgba(105, 217, 138, 0.45)',
+      cardGlow: '0 0 24px rgba(105, 217, 138, 0.20)',
+      bgGradient: 'rgba(105, 217, 138, 0.08)',
       moisture: 38,
       moistureStatus: currentLang === 'mr' 
         ? '३८% (ताण पातळी ४५% पेक्षा ७ टक्के गुणांनी खाली)' 
@@ -156,10 +158,11 @@ export default function Irrigation({
     check: {
       decision: t.irrigation.decisionCheck,
       title: t.irrigation.statusCheck,
-      badgeBg: '#FFEDD5',
-      badgeColor: '#C2410C',
-      borderColor: '#FDBA74',
-      bgGradient: 'linear-gradient(135deg, #FFF7ED 0%, #FFFFFF 100%)',
+      badgeBg: 'rgba(255, 154, 97, 0.22)',
+      badgeColor: '#FF9A61',
+      borderColor: 'rgba(255, 154, 97, 0.45)',
+      cardGlow: '0 0 24px rgba(255, 154, 97, 0.20)',
+      bgGradient: 'rgba(255, 154, 97, 0.08)',
       moisture: 51,
       moistureStatus: currentLang === 'mr' 
         ? '५१% (सीमावर्ती ओलावा - तपासणी आवश्यक)' 
@@ -211,7 +214,15 @@ export default function Irrigation({
   const current = scenarios[activeScenario];
 
   return (
-    <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '120px' }}>
+    <div style={{ 
+      padding: '16px 18px', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: '16px', 
+      paddingBottom: '120px',
+      position: 'relative',
+      zIndex: 10 
+    }}>
       
       {/* Toast Notification */}
       {toastMessage && (
@@ -220,14 +231,17 @@ export default function Irrigation({
           top: '20px',
           left: '50%',
           transform: 'translateX(-50%)',
-          background: '#1F2937',
+          background: 'rgba(7, 31, 22, 0.92)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
           color: '#FFFFFF',
-          padding: '12px 20px',
+          border: '1px solid rgba(197, 243, 107, 0.4)',
+          padding: '12px 22px',
           borderRadius: '30px',
           fontSize: '13px',
           fontWeight: 700,
           zIndex: 9999,
-          boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.5), 0 0 15px rgba(197, 243, 107, 0.3)',
           textAlign: 'center',
           maxWidth: '90%'
         }}>
@@ -236,59 +250,55 @@ export default function Irrigation({
       )}
 
       {/* HACKATHON PITCH HIGHLIGHT (Judges Key Takeaway) */}
-      <div style={{
-        background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)',
-        borderRadius: '16px',
-        padding: '12px 14px',
-        color: '#FFFFFF',
-        boxShadow: 'var(--shadow-sm)',
+      <div className="glass-card" style={{
+        padding: '14px 16px',
+        background: 'rgba(10, 43, 28, 0.65)',
+        border: '1px solid rgba(197, 243, 107, 0.35)',
         display: 'flex',
         alignItems: 'flex-start',
-        gap: '10px'
+        gap: '12px'
       }}>
-        <Sparkles size={20} color="#FCD34D" style={{ flexShrink: 0, marginTop: '2px' }} />
-        <div style={{ fontSize: '11.5px', lineHeight: '1.45', opacity: 0.95 }}>
-          <strong style={{ color: '#FCD34D', display: 'block', marginBottom: '2px', fontSize: '12px' }}>
-            {currentLang === 'mr' ? '💡 फार्मशील्ड एआय निर्णय तत्त्व (Core Pitch)' : '💡 FarmShield Decision Philosophy'}
+        <Sparkles size={22} color="#C5F36B" style={{ flexShrink: 0, marginTop: '2px' }} />
+        <div style={{ fontSize: '12px', lineHeight: '1.45' }}>
+          <strong style={{ color: '#C5F36B', display: 'block', marginBottom: '3px', fontSize: '12.5px' }}>
+            {currentLang === 'mr' ? '💡 फार्मशील्ड एआय निर्णय तत्त्व (Core Innovation)' : '💡 FarmShield Decision Philosophy'}
           </strong>
-          {currentLang === 'mr' 
-            ? '“फार्मशील्ड एआय केवळ पाणी देण्यास सांगत नाही, तर जमिनीतील जलसाठा, पिकाची खरी गरज आणि सेन्सर डेटाची विश्वासार्हता तपासून थांबणे, पाणी देणे किंवा प्रत्यक्ष पाहणीचा सल्ला देते.”'
-            : '“FarmShield AI doesn’t blindly trigger irrigation. It evaluates root-zone storage, atmospheric demand, and sensor confidence — recommending WAIT, IRRIGATE, or CHECK when data is uncertain.”'}
+          <span style={{ color: '#D5E3D9' }}>
+            {currentLang === 'mr' 
+              ? '“फार्मशील्ड एआय केवळ पाणी देण्यास सांगत नाही, तर जमिनीतील जलसाठा, पिकाची खरी गरज आणि सेन्सर डेटाची विश्वासार्हता तपासून थांबणे, पाणी देणे किंवा प्रत्यक्ष पाहणीचा सल्ला देते.”'
+              : '“FarmShield AI doesn’t blindly trigger irrigation. It evaluates root-zone storage, atmospheric demand, and sensor confidence — recommending WAIT, IRRIGATE, or CHECK when data is uncertain.”'}
+          </span>
         </div>
       </div>
 
       {/* Demo Scenario Switcher for Hackathon Judges */}
-      <div style={{
-        background: '#FFFFFF',
-        borderRadius: '16px',
-        padding: '12px',
-        border: '1.5px solid var(--border-color)',
-        boxShadow: 'var(--shadow-sm)'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Activity size={15} color="var(--primary)" />
-            हॅकाथॉन सिम्युलेटर (Hackathon Test Scenarios)
+      <div className="glass-card" style={{ padding: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Activity size={15} color="#C5F36B" />
+            हॅकाथॉन सिम्युलेटर (Test Scenarios)
           </span>
-          <span className="demo-tag" style={{ background: '#E0F2FE', color: '#0369A1', borderColor: '#BAE6FD' }}>
+          <span className="demo-tag">
             Simulated IoT Probe
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '6px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <button
             onClick={() => setActiveScenario('wait')}
             style={{
               flex: 1,
-              padding: '9px 4px',
-              borderRadius: '10px',
-              border: activeScenario === 'wait' ? '2.5px solid #F59E0B' : '1px solid #E2E8F0',
+              padding: '10px 4px',
+              borderRadius: '12px',
+              border: activeScenario === 'wait' ? '2px solid #FFC34D' : '1px solid rgba(255, 255, 255, 0.16)',
               fontSize: '11.5px',
               fontWeight: 800,
               cursor: 'pointer',
-              background: activeScenario === 'wait' ? '#FEF3C7' : '#F8FAFC',
-              color: activeScenario === 'wait' ? '#92400E' : '#64748B',
-              transition: 'all 0.15s ease'
+              background: activeScenario === 'wait' ? 'rgba(255, 195, 77, 0.22)' : 'rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(12px)',
+              color: activeScenario === 'wait' ? '#FFC34D' : '#D5E3D9',
+              boxShadow: activeScenario === 'wait' ? '0 0 16px rgba(255, 195, 77, 0.25)' : 'none',
+              transition: 'all 0.2s ease'
             }}
           >
             🟡 WAIT
@@ -298,15 +308,17 @@ export default function Irrigation({
             onClick={() => setActiveScenario('irrigate')}
             style={{
               flex: 1,
-              padding: '9px 4px',
-              borderRadius: '10px',
-              border: activeScenario === 'irrigate' ? '2.5px solid #16A34A' : '1px solid #E2E8F0',
+              padding: '10px 4px',
+              borderRadius: '12px',
+              border: activeScenario === 'irrigate' ? '2px solid #69D98A' : '1px solid rgba(255, 255, 255, 0.16)',
               fontSize: '11.5px',
               fontWeight: 800,
               cursor: 'pointer',
-              background: activeScenario === 'irrigate' ? '#DCFCE7' : '#F8FAFC',
-              color: activeScenario === 'irrigate' ? '#15803D' : '#64748B',
-              transition: 'all 0.15s ease'
+              background: activeScenario === 'irrigate' ? 'rgba(105, 217, 138, 0.22)' : 'rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(12px)',
+              color: activeScenario === 'irrigate' ? '#69D98A' : '#D5E3D9',
+              boxShadow: activeScenario === 'irrigate' ? '0 0 16px rgba(105, 217, 138, 0.25)' : 'none',
+              transition: 'all 0.2s ease'
             }}
           >
             🟢 IRRIGATE
@@ -316,15 +328,17 @@ export default function Irrigation({
             onClick={() => setActiveScenario('check')}
             style={{
               flex: 1,
-              padding: '9px 4px',
-              borderRadius: '10px',
-              border: activeScenario === 'check' ? '2.5px solid #EA580C' : '1px solid #E2E8F0',
+              padding: '10px 4px',
+              borderRadius: '12px',
+              border: activeScenario === 'check' ? '2px solid #FF9A61' : '1px solid rgba(255, 255, 255, 0.16)',
               fontSize: '11.5px',
               fontWeight: 800,
               cursor: 'pointer',
-              background: activeScenario === 'check' ? '#FFEDD5' : '#F8FAFC',
-              color: activeScenario === 'check' ? '#C2410C' : '#64748B',
-              transition: 'all 0.15s ease'
+              background: activeScenario === 'check' ? 'rgba(255, 154, 97, 0.22)' : 'rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(12px)',
+              color: activeScenario === 'check' ? '#FF9A61' : '#D5E3D9',
+              boxShadow: activeScenario === 'check' ? '0 0 16px rgba(255, 154, 97, 0.25)' : 'none',
+              transition: 'all 0.2s ease'
             }}
           >
             🟠 CHECK
@@ -332,22 +346,23 @@ export default function Irrigation({
         </div>
       </div>
 
-      {/* MAIN DECISION HERO CARD - Updates dynamically with scenario */}
-      <div style={{
+      {/* MAIN DECISION HERO CARD - Dynamic Translucent Glass Surface */}
+      <div className="glass-card" style={{
         background: current.bgGradient,
         borderRadius: '24px',
         padding: '20px',
-        border: `2px solid ${current.borderColor}`,
-        boxShadow: 'var(--shadow-md)',
+        border: `1.5px solid ${current.borderColor}`,
+        boxShadow: `0 12px 36px rgba(0, 0, 0, 0.35), ${current.cardGlow}`,
         position: 'relative',
         transition: 'all 0.25s ease'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
           <span className="status-pill" style={{
             background: current.badgeBg,
+            border: `1px solid ${current.borderColor}`,
             color: current.badgeColor,
             fontSize: '12.5px',
-            padding: '5px 12px'
+            padding: '5px 14px'
           }}>
             <Droplets size={15} />
             {current.decision}
@@ -359,29 +374,31 @@ export default function Irrigation({
         </div>
 
         <h2 style={{
-          fontSize: '18px',
+          fontSize: '19px',
           fontWeight: 800,
-          color: 'var(--text-main)',
+          color: '#FFFFFF',
           lineHeight: '1.3',
-          marginBottom: '6px'
+          marginBottom: '8px',
+          textShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
         }}>
           {current.title}
         </h2>
 
         {/* Quick Agronomic Context */}
-        <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: '1.45', marginBottom: '12px' }}>
+        <p style={{ fontSize: '13px', color: '#D5E3D9', lineHeight: '1.5', marginBottom: '14px' }}>
           {current.quickSummary}
         </p>
 
         {/* Dynamic Moisture Gauge */}
         <div style={{
-          background: '#FFFFFF',
+          background: 'rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(12px)',
           borderRadius: '16px',
           padding: '14px',
-          border: '1px solid var(--border-color)'
+          border: '1px solid rgba(255, 255, 255, 0.14)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <span style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-main)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#FFFFFF' }}>
               {t.irrigation.soilMoisture}
             </span>
             <span style={{ fontSize: '13px', fontWeight: 800, color: current.badgeColor }}>
@@ -389,18 +406,21 @@ export default function Irrigation({
             </span>
           </div>
 
+          {/* Bar track */}
           <div style={{
             height: '14px',
-            background: '#E2ECE0',
+            background: 'rgba(255, 255, 255, 0.12)',
             borderRadius: '7px',
             overflow: 'hidden',
-            position: 'relative'
+            position: 'relative',
+            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)'
           }}>
             <div style={{
               width: `${current.moisture}%`,
               height: '100%',
               background: current.badgeColor,
               borderRadius: '7px',
+              boxShadow: `0 0 12px ${current.badgeColor}`,
               transition: 'all 0.4s ease'
             }} />
           </div>
@@ -408,13 +428,13 @@ export default function Irrigation({
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            fontSize: '10px',
-            color: 'var(--text-muted)',
-            marginTop: '6px'
+            fontSize: '10.5px',
+            color: '#D5E3D9',
+            marginTop: '8px'
           }}>
             <span>कोरडी (0%)</span>
-            <span style={{ color: '#DC2626', fontWeight: 700 }}>ताण पातळी (४५%)</span>
-            <span style={{ color: '#16A34A', fontWeight: 700 }}>क्षेत्र क्षमता (७२%)</span>
+            <span style={{ color: '#F87171', fontWeight: 700 }}>ताण पातळी (४५%)</span>
+            <span style={{ color: '#69D98A', fontWeight: 700 }}>क्षेत्र क्षमता (७२%)</span>
           </div>
         </div>
 
@@ -425,23 +445,23 @@ export default function Irrigation({
           gap: '8px',
           marginTop: '12px'
         }}>
-          <div style={{ background: '#FFFFFF', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
-            <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>बाष्पीभवन (ET₀)</div>
-            <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-main)', marginTop: '2px' }}>{current.evapotranspiration}</div>
+          <div className="glass-panel" style={{ padding: '9px 6px', textAlign: 'center' }}>
+            <div style={{ fontSize: '10.5px', color: '#B6C8BB' }}>बाष्पीभवन (ET₀)</div>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#FFFFFF', marginTop: '3px' }}>{current.evapotranspiration}</div>
           </div>
-          <div style={{ background: '#FFFFFF', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
-            <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>पिकाची गरज</div>
-            <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-main)', marginTop: '2px' }}>{current.cropWaterNeed}</div>
+          <div className="glass-panel" style={{ padding: '9px 6px', textAlign: 'center' }}>
+            <div style={{ fontSize: '10.5px', color: '#B6C8BB' }}>पिकाची गरज</div>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#FFFFFF', marginTop: '3px' }}>{current.cropWaterNeed}</div>
           </div>
-          <div style={{ background: '#FFFFFF', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
-            <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>पुढील वेळ</div>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: current.badgeColor, marginTop: '2px' }}>{current.hoursRemaining}</div>
+          <div className="glass-panel" style={{ padding: '9px 6px', textAlign: 'center' }}>
+            <div style={{ fontSize: '10.5px', color: '#B6C8BB' }}>पुढील वेळ</div>
+            <div style={{ fontSize: '11.5px', fontWeight: 800, color: current.badgeColor, marginTop: '3px' }}>{current.hoursRemaining}</div>
           </div>
         </div>
       </div>
 
       {/* TRANSPARENT SCIENTIFIC REASONING CARD (Explainable Agronomic Logic) */}
-      <div className="farmer-card" style={{ borderLeft: '4px solid var(--primary)' }}>
+      <div className="glass-card" style={{ borderLeft: '4px solid #C5F36B' }}>
         <div 
           onClick={() => setShowLogicDetails(!showLogicDetails)}
           style={{
@@ -454,61 +474,52 @@ export default function Irrigation({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              background: 'var(--primary-light)',
-              color: 'var(--primary)',
+              width: '34px',
+              height: '34px',
+              borderRadius: '10px',
+              background: 'rgba(197, 243, 107, 0.18)',
+              border: '1px solid rgba(197, 243, 107, 0.35)',
+              color: '#C5F36B',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <FileText size={16} />
+              <FileText size={18} />
             </div>
             <div>
-              <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-main)' }}>
+              <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#FFFFFF' }}>
                 {t.irrigation.logicTitle}
               </div>
-              <div style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>
+              <div style={{ fontSize: '11px', color: '#D5E3D9' }}>
                 {currentLang === 'mr' ? 'कापूस पीक • काळी माती • ३० सेमी मुळांचे क्षेत्र' : 'Cotton • Black Soil • 30cm Root Zone'}
               </div>
             </div>
           </div>
 
-          <span style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 700 }}>
+          <span style={{ fontSize: '12px', color: '#C5F36B', fontWeight: 800 }}>
             {showLogicDetails ? 'कमी करा' : 'सर्व पहा'}
           </span>
         </div>
 
         {/* Detailed Points (First point always visible, rest toggleable) */}
-        <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '10px', borderTop: '1px solid var(--border-color)' }}>
+        <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.12)' }}>
           {/* Point 1: Always visible */}
-          <div style={{
-            background: 'var(--bg-main)',
-            padding: '10px 12px',
-            borderRadius: '12px',
-            border: '1px solid var(--border-color)'
-          }}>
-            <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--primary-dark)', marginBottom: '3px' }}>
+          <div className="glass-panel" style={{ padding: '12px 14px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#C5F36B', marginBottom: '4px' }}>
               {current.logicPoints[0].title}
             </div>
-            <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', lineHeight: '1.45' }}>
+            <div style={{ fontSize: '12px', color: '#D5E3D9', lineHeight: '1.5' }}>
               {current.logicPoints[0].desc}
             </div>
           </div>
 
           {/* Points 2 & 3: Visible when expanded */}
           {showLogicDetails && current.logicPoints.slice(1).map((pt, idx) => (
-            <div key={idx} style={{
-              background: 'var(--bg-main)',
-              padding: '10px 12px',
-              borderRadius: '12px',
-              border: '1px solid var(--border-color)'
-            }}>
-              <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--primary-dark)', marginBottom: '3px' }}>
+            <div key={idx} className="glass-panel" style={{ padding: '12px 14px' }}>
+              <div style={{ fontSize: '13px', fontWeight: 800, color: '#C5F36B', marginBottom: '4px' }}>
                 {pt.title}
               </div>
-              <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', lineHeight: '1.45' }}>
+              <div style={{ fontSize: '12px', color: '#D5E3D9', lineHeight: '1.5' }}>
                 {pt.desc}
               </div>
             </div>
@@ -516,17 +527,17 @@ export default function Irrigation({
 
           {/* Explicit Farmer Action Plan */}
           <div style={{
-            background: '#F0FDF4',
-            border: '1.5px solid #86EFAC',
-            borderRadius: '12px',
-            padding: '12px',
-            marginTop: '2px'
+            background: 'rgba(105, 217, 138, 0.15)',
+            border: '1.5px solid rgba(105, 217, 138, 0.4)',
+            borderRadius: '14px',
+            padding: '12px 14px',
+            marginTop: '4px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 800, color: '#166534', marginBottom: '4px' }}>
-              <CheckCircle2 size={16} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 800, color: '#69D98A', marginBottom: '4px' }}>
+              <CheckCircle2 size={17} />
               <span>{t.irrigation.nextActionTitle}</span>
             </div>
-            <p style={{ fontSize: '12px', color: '#14532D', lineHeight: '1.4', fontWeight: 600 }}>
+            <p style={{ fontSize: '12.5px', color: '#FFFFFF', lineHeight: '1.45', fontWeight: 600 }}>
               👉 {current.nextAction}
             </p>
           </div>
@@ -539,32 +550,38 @@ export default function Irrigation({
         gridTemplateColumns: 'repeat(2, 1fr)',
         gap: '12px'
       }}>
-        <div className="farmer-card" style={{ background: '#F0FDF4', borderColor: '#BBF7D0' }}>
-          <div style={{ color: '#16A34A', marginBottom: '4px' }}>
-            <Waves size={20} />
+        <div className="glass-card" style={{
+          background: 'rgba(105, 217, 138, 0.12)',
+          border: '1px solid rgba(105, 217, 138, 0.35)'
+        }}>
+          <div style={{ color: '#69D98A', marginBottom: '4px' }}>
+            <Waves size={22} />
           </div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>
+          <div style={{ fontSize: '11px', color: '#B6C8BB', fontWeight: 600 }}>
             {t.irrigation.waterSaved}
           </div>
-          <div style={{ fontSize: '17px', fontWeight: 800, color: '#15803D', marginTop: '2px' }}>
+          <div style={{ fontSize: '18px', fontWeight: 800, color: '#69D98A', marginTop: '2px' }}>
             {t.irrigation.litres}
           </div>
-          <div style={{ fontSize: '9.5px', color: '#65A30D', marginTop: '2px' }}>
+          <div style={{ fontSize: '10px', color: '#A8D94A', marginTop: '2px' }}>
             [मॉडेल अंदाज / Model Estimate]
           </div>
         </div>
 
-        <div className="farmer-card" style={{ background: '#FFFBEB', borderColor: '#FDE68A' }}>
-          <div style={{ color: '#D97706', marginBottom: '4px' }}>
-            <Zap size={20} />
+        <div className="glass-card" style={{
+          background: 'rgba(255, 195, 77, 0.12)',
+          border: '1px solid rgba(255, 195, 77, 0.35)'
+        }}>
+          <div style={{ color: '#FFC34D', marginBottom: '4px' }}>
+            <Zap size={22} />
           </div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>
+          <div style={{ fontSize: '11px', color: '#B6C8BB', fontWeight: 600 }}>
             {currentLang === 'mr' ? 'वीज बचत' : 'Electricity Saved'}
           </div>
-          <div style={{ fontSize: '17px', fontWeight: 800, color: '#B45309', marginTop: '2px' }}>
+          <div style={{ fontSize: '18px', fontWeight: 800, color: '#FFC34D', marginTop: '2px' }}>
             ₹680 (१४ युनिट्स)
           </div>
-          <div style={{ fontSize: '9.5px', color: '#D97706', marginTop: '2px' }}>
+          <div style={{ fontSize: '10px', color: '#FFC34D', marginTop: '2px' }}>
             [मॉडेल अंदाज / Model Estimate]
           </div>
         </div>
@@ -574,13 +591,15 @@ export default function Irrigation({
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <button
           onClick={handleToggleMotor}
-          className="btn-farmer-primary"
+          className="btn-glass-primary"
           style={{
             background: motorRunning 
-              ? 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)' 
+              ? 'linear-gradient(135deg, rgba(220, 38, 38, 0.95) 0%, rgba(153, 27, 27, 0.95) 100%)' 
               : activeScenario === 'irrigate'
-              ? 'linear-gradient(135deg, #16A34A 0%, #15803D 100%)'
-              : 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)'
+              ? 'linear-gradient(135deg, rgba(22, 163, 74, 0.95) 0%, rgba(21, 128, 61, 0.95) 100%)'
+              : 'linear-gradient(135deg, rgba(101, 199, 106, 0.95) 0%, rgba(27, 94, 32, 0.95) 100%)',
+            borderColor: motorRunning ? 'rgba(239, 68, 68, 0.5)' : 'rgba(197, 243, 107, 0.45)',
+            boxShadow: motorRunning ? '0 0 20px rgba(220, 38, 38, 0.5)' : undefined
           }}
         >
           <Power size={18} />
@@ -596,19 +615,19 @@ export default function Irrigation({
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
           <button
             onClick={() => showToast(currentLang === 'mr' ? 'स्मार्ट अलर्ट सेट केला! सिंचनाआधी अर्धा तास मेसेज येईल.' : 'Smart alert scheduled for next cycle.')}
-            className="btn-farmer-secondary"
+            className="btn-glass-secondary"
             style={{ fontSize: '12px' }}
           >
-            <CalendarCheck size={15} />
+            <CalendarCheck size={15} color="#C5F36B" />
             <span>{t.irrigation.setReminder}</span>
           </button>
 
           <button
             onClick={() => showToast(currentLang === 'mr' ? 'माती सेन्सर डेटा रिफ्रेश झाला (IoT Probe #A-102)' : 'Sensor probe #A-102 telemetry refreshed.')}
-            className="btn-farmer-secondary"
+            className="btn-glass-secondary"
             style={{ fontSize: '12px' }}
           >
-            <RotateCw size={15} />
+            <RotateCw size={15} color="#C5F36B" />
             <span>{t.irrigation.testMoisture}</span>
           </button>
         </div>

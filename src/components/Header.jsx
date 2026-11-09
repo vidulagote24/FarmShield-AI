@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, Bell, ChevronLeft, Shield, Sparkles } from 'lucide-react';
+import { Globe, Bell, ChevronLeft, Shield } from 'lucide-react';
 
 export default function Header({ 
   title, 
@@ -9,7 +9,7 @@ export default function Header({
   currentLang, 
   onToggleLang, 
   farmerName,
-  isDarkTheme = false
+  isDarkTheme = true
 }) {
   const langLabels = {
     mr: 'मराठी',
@@ -20,10 +20,11 @@ export default function Header({
   return (
     <header style={{
       padding: '14px 18px 12px',
-      background: isDarkTheme ? 'rgba(7, 31, 22, 0.85)' : '#FFFFFF',
-      backdropFilter: isDarkTheme ? 'blur(16px)' : 'none',
-      WebkitBackdropFilter: isDarkTheme ? 'blur(16px)' : 'none',
-      borderBottom: isDarkTheme ? '1px solid rgba(255, 255, 255, 0.10)' : '1px solid var(--border-color)',
+      background: 'rgba(7, 31, 22, 0.75)',
+      backdropFilter: 'blur(20px) saturate(140%)',
+      WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -40,13 +41,16 @@ export default function Header({
               width: '38px',
               height: '38px',
               borderRadius: '12px',
-              border: isDarkTheme ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid var(--border-color)',
-              background: isDarkTheme ? 'rgba(255, 255, 255, 0.08)' : '#F4F7F2',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              background: 'rgba(255, 255, 255, 0.10)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: isDarkTheme ? '#FFFFFF' : 'var(--text-main)'
+              color: '#FFFFFF',
+              transition: 'all 0.2s ease'
             }}
             aria-label="Back"
           >
@@ -57,15 +61,13 @@ export default function Header({
             width: '38px',
             height: '38px',
             borderRadius: '12px',
-            background: isDarkTheme 
-              ? 'linear-gradient(135deg, #164B32 0%, #0B2D20 100%)' 
-              : 'linear-gradient(135deg, #2E7D32, #1B5E20)',
-            border: isDarkTheme ? '1px solid rgba(168, 217, 74, 0.4)' : 'none',
+            background: 'linear-gradient(135deg, rgba(101, 199, 106, 0.25) 0%, rgba(11, 45, 32, 0.8) 100%)',
+            border: '1px solid rgba(197, 243, 107, 0.45)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: isDarkTheme ? '#C5F36B' : '#FFFFFF',
-            boxShadow: isDarkTheme ? '0 0 12px rgba(168, 217, 74, 0.25)' : 'none'
+            color: '#C5F36B',
+            boxShadow: '0 0 14px rgba(197, 243, 107, 0.25)'
           }}>
             <Shield size={20} />
           </div>
@@ -76,32 +78,31 @@ export default function Header({
             <h1 style={{
               fontSize: '16px',
               fontWeight: 800,
-              color: isDarkTheme ? '#FFFFFF' : 'var(--primary-dark)',
+              color: '#FFFFFF',
               letterSpacing: '-0.3px',
               lineHeight: 1.2
             }}>
               {title || 'FarmShield AI'}
             </h1>
-            {isDarkTheme && (
-              <span style={{
-                fontSize: '9.5px',
-                fontWeight: 800,
-                color: '#C5F36B',
-                background: 'rgba(168, 217, 74, 0.15)',
-                border: '1px solid rgba(168, 217, 74, 0.3)',
-                padding: '1px 6px',
-                borderRadius: '8px',
-                letterSpacing: '0.4px'
-              }}>
-                PRO
-              </span>
-            )}
+            <span style={{
+              fontSize: '9.5px',
+              fontWeight: 800,
+              color: '#C5F36B',
+              background: 'rgba(197, 243, 107, 0.15)',
+              border: '1px solid rgba(197, 243, 107, 0.35)',
+              padding: '1px 6px',
+              borderRadius: '8px',
+              letterSpacing: '0.4px'
+            }}>
+              PRO
+            </span>
           </div>
           {subtitle && (
             <p style={{
               fontSize: '11.5px',
-              color: isDarkTheme ? '#C4D4C8' : 'var(--text-muted)',
-              fontWeight: 500
+              color: '#D5E3D9',
+              fontWeight: 500,
+              marginTop: '1px'
             }}>
               {subtitle}
             </p>
@@ -117,11 +118,13 @@ export default function Header({
             display: 'flex',
             alignItems: 'center',
             gap: '5px',
-            padding: '6px 11px',
+            padding: '6px 12px',
             borderRadius: '20px',
-            border: isDarkTheme ? '1px solid rgba(168, 217, 74, 0.35)' : '1.5px solid var(--primary-soft)',
-            background: isDarkTheme ? 'rgba(22, 75, 50, 0.55)' : 'var(--primary-light)',
-            color: isDarkTheme ? '#C5F36B' : 'var(--primary-dark)',
+            border: '1px solid rgba(197, 243, 107, 0.35)',
+            background: 'rgba(10, 43, 28, 0.65)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            color: '#C5F36B',
             fontSize: '12px',
             fontWeight: 700,
             cursor: 'pointer',
@@ -139,15 +142,18 @@ export default function Header({
             width: '36px',
             height: '36px',
             borderRadius: '50%',
-            border: isDarkTheme ? '1px solid rgba(255, 255, 255, 0.14)' : '1px solid var(--border-color)',
-            background: isDarkTheme ? 'rgba(255, 255, 255, 0.08)' : '#FFFFFF',
+            border: '1px solid rgba(255, 255, 255, 0.18)',
+            background: 'rgba(255, 255, 255, 0.10)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: isDarkTheme ? '#C4D4C8' : 'var(--text-muted)',
+            color: '#D5E3D9',
             cursor: 'pointer',
             position: 'relative'
           }}
+          aria-label="Notifications"
         >
           <Bell size={16} />
           <span style={{
@@ -158,7 +164,7 @@ export default function Header({
             height: '6px',
             backgroundColor: '#C5F36B',
             borderRadius: '50%',
-            boxShadow: isDarkTheme ? '0 0 6px #C5F36B' : 'none'
+            boxShadow: '0 0 8px #C5F36B'
           }} />
         </button>
       </div>

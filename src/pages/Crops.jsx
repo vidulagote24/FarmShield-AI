@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Bug, Camera, AlertTriangle, CheckCircle, Search } from 'lucide-react';
+import { ShieldCheck, Bug, Camera, AlertTriangle, CheckCircle, Search, Sparkles } from 'lucide-react';
 
 export default function Crops({ farmData, t, currentLang }) {
   const [analyzing, setAnalyzing] = useState(false);
@@ -22,61 +22,77 @@ export default function Crops({ farmData, t, currentLang }) {
   };
 
   return (
-    <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div style={{ 
+      padding: '16px 18px', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: '16px',
+      position: 'relative',
+      zIndex: 10 
+    }}>
       
-      {/* Header Banner */}
-      <div style={{
-        background: '#FFFFFF',
-        borderRadius: '20px',
+      {/* Header Banner in Glass Card */}
+      <div className="glass-card" style={{
         padding: '18px',
-        border: '1px solid var(--border-color)',
-        boxShadow: 'var(--shadow-sm)'
+        border: '1px solid rgba(105, 217, 138, 0.35)',
+        background: 'rgba(10, 43, 28, 0.60)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <span className="status-pill" style={{ background: '#DCFCE7', color: '#16A34A' }}>
+          <span className="glass-pill" style={{
+            background: 'rgba(105, 217, 138, 0.18)',
+            border: '1px solid rgba(105, 217, 138, 0.35)',
+            color: '#69D98A'
+          }}>
             <ShieldCheck size={14} />
             {currentLang === 'mr' ? 'पीक आरोग्य' : 'Crop Health'}
           </span>
-          <span style={{ fontSize: '13px', fontWeight: 800, color: '#16A34A' }}>
+          <span style={{ fontSize: '13px', fontWeight: 800, color: '#69D98A' }}>
             ९४% निरोगी
           </span>
         </div>
-        <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-main)' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#FFFFFF', marginBottom: '4px' }}>
           {cropName} {currentLang === 'mr' ? 'संरक्षण कवच' : 'Protection Shield'}
         </h3>
-        <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
+        <p style={{ fontSize: '13px', color: '#D5E3D9', lineHeight: '1.45' }}>
           {currentLang === 'mr' 
             ? 'पिकाच्या पानावरील डाग किंवा रोगाचा फोटो काढून त्वरित निदान मिळवा.'
             : 'Capture leaf photo to diagnose pests, fungus and nutrient deficiency.'}
         </p>
       </div>
 
-      {/* AI Leaf Scanner Button */}
-      <div className="farmer-card" style={{ textAlign: 'center', padding: '24px 18px', border: '2px dashed var(--primary)' }}>
+      {/* AI Leaf Scanner Glass Card */}
+      <div className="glass-card" style={{ 
+        textAlign: 'center', 
+        padding: '24px 18px', 
+        border: '2px dashed rgba(197, 243, 107, 0.45)',
+        background: 'rgba(10, 43, 28, 0.55)'
+      }}>
         <div style={{
-          width: '60px',
-          height: '60px',
+          width: '64px',
+          height: '64px',
           borderRadius: '50%',
-          background: 'var(--primary-light)',
-          color: 'var(--primary)',
+          background: 'rgba(197, 243, 107, 0.18)',
+          border: '1px solid rgba(197, 243, 107, 0.35)',
+          color: '#C5F36B',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto 12px'
+          margin: '0 auto 14px',
+          boxShadow: '0 0 16px rgba(197, 243, 107, 0.25)'
         }}>
-          <Camera size={30} />
+          <Camera size={32} />
         </div>
-        <h4 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '6px' }}>
+        <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF', marginBottom: '6px' }}>
           {currentLang === 'mr' ? 'पानाचा फोटो घ्या' : 'Scan Leaf with Camera'}
         </h4>
-        <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+        <p style={{ fontSize: '13px', color: '#D5E3D9', marginBottom: '18px' }}>
           {currentLang === 'mr' ? 'एआय द्वारे २ सेकंदात अचूक औषध व सल्ला' : 'Instant AI disease diagnosis & remedies'}
         </p>
 
         <button
           onClick={handleSimulateScan}
           disabled={analyzing}
-          className="btn-farmer-primary"
+          className="btn-glass-primary"
           style={{ maxWidth: '280px', margin: '0 auto' }}
         >
           <Camera size={18} />
@@ -85,80 +101,50 @@ export default function Crops({ farmData, t, currentLang }) {
 
         {scannedResult && (
           <div style={{
-            marginTop: '16px',
-            padding: '14px',
-            background: '#FEF3C7',
-            borderRadius: '14px',
+            marginTop: '18px',
+            padding: '16px',
+            background: 'rgba(255, 195, 77, 0.14)',
+            backdropFilter: 'blur(16px)',
+            borderRadius: '16px',
             textAlign: 'left',
-            border: '1.5px solid #FCD34D'
+            border: '1.5px solid rgba(255, 195, 77, 0.4)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#92400E', fontWeight: 800, fontSize: '14px' }}>
-              <AlertTriangle size={16} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#FFC34D', fontWeight: 800, fontSize: '15px' }}>
+              <AlertTriangle size={18} />
               <span>{scannedResult.disease}</span>
             </div>
-            <div style={{ fontSize: '12px', color: '#B45309', margin: '4px 0 8px' }}>
-              तीव्रता: {scannedResult.severity}
+            <div style={{ fontSize: '12px', color: '#D5E3D9', margin: '6px 0 10px' }}>
+              तीव्रता: <strong style={{ color: '#FFC34D' }}>{scannedResult.severity}</strong>
             </div>
-            <div style={{ fontSize: '12.5px', color: 'var(--text-main)', lineHeight: '1.4' }}>
-              💊 {scannedResult.remedy}
+            <div style={{ 
+              fontSize: '12.5px', 
+              color: '#FFFFFF', 
+              lineHeight: '1.5',
+              padding: '10px 12px',
+              background: 'rgba(7, 31, 22, 0.7)',
+              borderRadius: '10px',
+              border: '1px solid rgba(255, 255, 255, 0.10)'
+            }}>
+              <strong>💡 उपाय / Remedy:</strong> {scannedResult.remedy}
             </div>
           </div>
         )}
       </div>
 
-      {/* Seasonal Alert List */}
-      <div>
-        <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '10px' }}>
-          🔔 {currentLang === 'mr' ? 'चालू हंगामातील संभाव्य धोके' : 'Seasonal Risk Alerts'}
+      {/* Advisory & Preventive Tips */}
+      <div className="glass-card" style={{ padding: '16px' }}>
+        <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#FFFFFF', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Sparkles size={16} color="#C5F36B" />
+          {currentLang === 'mr' ? 'पिकांच्या संरक्षणासाठी सूचना' : 'Crop Protection Tips'}
         </h4>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div className="farmer-card" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: '#DCFCE7',
-              color: '#16A34A',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              <CheckCircle size={20} />
-            </div>
-            <div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>
-                {currentLang === 'mr' ? 'गुलाबी बोंडअळी धोका: शून्य' : 'Pink Bollworm Risk: None'}
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                {currentLang === 'mr' ? 'फेरोमोन ट्रॅप्समधील संख्या नियंत्रणात आहे.' : 'Pheromone traps show zero counts.'}
-              </div>
-            </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="glass-panel" style={{ padding: '10px 12px', fontSize: '12.5px', color: '#D5E3D9', lineHeight: '1.45' }}>
+            🌿 <strong>ओलावा नियंत्रण:</strong> अतिरिक्त पाण्यामुळे मुळांवर बुरशीचा प्रादुर्भाव वाढू शकतो; सेन्सर सल्ल्यानुसारच पाणी द्या.
           </div>
-
-          <div className="farmer-card" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: '#FEF3C7',
-              color: '#D97706',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              <Bug size={20} />
-            </div>
-            <div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>
-                {currentLang === 'mr' ? 'मावा / तुडतुडे सावधगिरी' : 'Aphids / Jassids Alert'}
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                {currentLang === 'mr' ? 'पिवळे चिकट सापळे एकरी ५ या प्रमाणात लावा.' : 'Install 5 yellow sticky traps per acre.'}
-              </div>
-            </div>
+          <div className="glass-panel" style={{ padding: '10px 12px', fontSize: '12.5px', color: '#D5E3D9', lineHeight: '1.45' }}>
+            🔍 <strong>नियमित पाहणी:</strong> पानांच्या खालच्या बाजूला रसशोषक किडींचे निरीक्षण दुपारी १२ ते ३ दरम्यान करा.
           </div>
         </div>
       </div>

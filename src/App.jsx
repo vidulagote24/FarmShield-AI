@@ -50,8 +50,6 @@ export default function App() {
     setFarmData(prev => ({ ...prev, [field]: value }));
   };
 
-  const isDarkDashboard = currentScreen === 'main' && activeTab === 'dashboard';
-
   // Determine header title based on active view
   const getHeaderInfo = () => {
     if (currentScreen === 'welcome') {
@@ -85,8 +83,8 @@ export default function App() {
     <>
       {/* Top Desktop Controls: Toggle between Phone Frame and Responsive View */}
       <div className="top-desktop-controls">
-        <span style={{ fontSize: '12px', fontWeight: 700, color: '#334435' }}>
-          📱 FarmShield AI Mobile Preview
+        <span style={{ fontSize: '12px', fontWeight: 800, color: '#C5F36B', display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <span>🌾</span> FarmShield AI Glassmorphic Preview
         </span>
         <button
           onClick={() => setIsPhoneFrame(!isPhoneFrame)}
@@ -94,39 +92,45 @@ export default function App() {
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            background: 'var(--primary-light)',
-            color: 'var(--primary-dark)',
-            border: 'none',
-            padding: '5px 10px',
+            background: 'rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(10px)',
+            color: '#FFFFFF',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            padding: '5px 12px',
             borderRadius: '16px',
-            fontSize: '11px',
+            fontSize: '11.5px',
             fontWeight: 700,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
           }}
         >
-          {isPhoneFrame ? <Monitor size={14} /> : <Smartphone size={14} />}
+          {isPhoneFrame ? <Monitor size={14} color="#C5F36B" /> : <Smartphone size={14} color="#C5F36B" />}
           <span>{isPhoneFrame ? 'Full Width' : 'Phone Shell'}</span>
         </button>
       </div>
 
       <div 
-        className={`app-viewport-wrapper ${isDarkDashboard ? 'dark-dashboard-mode' : ''}`} 
-        style={!isPhoneFrame ? { maxWidth: '100%', minHeight: '100vh', height: '100vh', borderRadius: 0, border: 'none', boxShadow: 'none' } : {}}
+        className="app-viewport-wrapper" 
+        style={!isPhoneFrame ? { 
+          maxWidth: '100%', 
+          minHeight: '100vh', 
+          height: '100vh', 
+          borderRadius: 0, 
+          border: 'none', 
+          boxShadow: 'none' 
+        } : {}}
       >
         {/* Mobile Phone Top Status Bar Simulation */}
-        <div 
-          className="phone-status-bar"
-          style={isDarkDashboard ? { color: '#FFFFFF' } : {}}
-        >
+        <div className="phone-status-bar">
           <span>9:41</span>
-          <div className="status-bar-notch" style={isDarkDashboard ? { backgroundColor: '#071F16', border: '1px solid rgba(255,255,255,0.1)' } : {}} />
-          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+          <div className="status-bar-notch" />
+          <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
             <span>5G</span>
             <span>100%</span>
           </div>
         </div>
 
-        {/* Global App Header */}
+        {/* Global Glass App Header */}
         <Header
           title={headerInfo.title}
           subtitle={headerInfo.subtitle}
@@ -138,11 +142,11 @@ export default function App() {
           currentLang={currentLang}
           onToggleLang={cycleLanguage}
           farmerName={farmerData.name}
-          isDarkTheme={isDarkDashboard}
+          isDarkTheme={true}
         />
 
         {/* Main Screen Content View */}
-        <main className={`screen-scroll-container ${currentScreen !== 'main' ? 'onboarding-screen' : ''} ${isDarkDashboard ? 'dark-scroll-container' : ''}`}>
+        <main className={`screen-scroll-container ${currentScreen !== 'main' ? 'onboarding-screen' : ''}`}>
           {currentScreen === 'welcome' && (
             <Welcome
               currentLang={currentLang}
@@ -214,13 +218,13 @@ export default function App() {
           )}
         </main>
 
-        {/* Bottom Navigation Bar (Visible in Main App) */}
+        {/* Floating Glass Bottom Navigation Bar (Visible in Main App) */}
         {currentScreen === 'main' && (
           <BottomNav
             activeTab={activeTab}
             onSelectTab={(tab) => setActiveTab(tab)}
             t={t}
-            isDarkTheme={isDarkDashboard}
+            isDarkTheme={true}
           />
         )}
       </div>
