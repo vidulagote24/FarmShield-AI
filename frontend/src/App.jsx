@@ -10,12 +10,23 @@ import Irrigation from './pages/Irrigation';
 import Crops from './pages/Crops';
 import Profile from './pages/Profile';
 import FarmMapPage from './features/farm-map/pages/FarmMapPage';
+import ZoneDetailsPage from './features/zones/pages/ZoneDetailsPage';
+import IrrigationPlannerPage from './features/irrigation/pages/IrrigationPlannerPage';
 import { Smartphone, Monitor } from 'lucide-react';
 
 export default function App() {
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const paramScreen = urlParams?.get('screen');
+  const paramTab = urlParams?.get('tab');
+  const paramZone = urlParams?.get('zone');
+
   const [currentLang, setCurrentLang] = useState('mr'); // default to Marathi
-  const [currentScreen, setCurrentScreen] = useState('welcome'); // 'welcome' | 'register' | 'farm_setup' | 'main'
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'irrigation' | 'crops' | 'profile'
+  const [currentScreen, setCurrentScreen] = useState(paramScreen || 'main'); // 'welcome' | 'register' | 'farm_setup' | 'main'
+  const [activeTab, setActiveTab] = useState(paramTab || 'zone_details'); // 'dashboard' | 'irrigation' | 'crops' | 'profile' | 'farm_map' | 'zone_details'
+  
+  // Active selected zone context for Zone Intelligence inspection
+  const [selectedZoneId, setSelectedZoneId] = useState(paramZone || 'z3-south-west-003');
+  const [selectedFarmId, setSelectedFarmId] = useState(null);
   
   // Responsive frame toggle for desktop preview
   const [isPhoneFrame, setIsPhoneFrame] = useState(true);
@@ -81,6 +92,12 @@ export default function App() {
         subtitle: currentLang === 'mr' ? 'शेताचा डिजिटल नकाशा (४ विभाग)' : 'Farm Digital Twin (4 Zones)' 
       };
     }
+    if (activeTab === 'zone_details') {
+      return {
+        title: 'FarmShield AI',
+        subtitle: currentLang === 'mr' ? 'विभाग बुद्धिमत्ता व विश्लेषण' : 'Zone Intelligence & Details'
+      };
+    }
     return { title: 'FarmShield AI' };
   };
 
@@ -94,15 +111,15 @@ export default function App() {
           <span>🌾</span> FarmShield AI Glassmorphic Preview
         </span>
         <button
-          onClick={() => setActiveTab(activeTab === 'farm_map' ? 'dashboard' : 'farm_map')}
+          onClick={() => setActiveTab(activeTab === 'farm_map' || activeTab === 'zone_details' ? 'dashboard' : 'farm_map')}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '5px',
-            background: activeTab === 'farm_map' ? 'rgba(197, 243, 107, 0.25)' : 'rgba(255, 255, 255, 0.12)',
+            background: activeTab === 'farm_map' || activeTab === 'zone_details' ? 'rgba(197, 243, 107, 0.25)' : 'rgba(255, 255, 255, 0.12)',
             backdropFilter: 'blur(10px)',
-            color: activeTab === 'farm_map' ? '#C5F36B' : '#FFFFFF',
-            border: activeTab === 'farm_map' ? '1px solid #C5F36B' : '1px solid rgba(255, 255, 255, 0.2)',
+            color: activeTab === 'farm_map' || activeTab === 'zone_details' ? '#C5F36B' : '#FFFFFF',
+            border: activeTab === 'farm_map' || activeTab === 'zone_details' ? '1px solid #C5F36B' : '1px solid rgba(255, 255, 255, 0.2)',
             padding: '5px 12px',
             borderRadius: '16px',
             fontSize: '11.5px',
@@ -111,7 +128,7 @@ export default function App() {
             transition: 'all 0.2s ease',
           }}
         >
-          <span>🗺️ {activeTab === 'farm_map' ? (currentLang === 'mr' ? 'डॅशबोर्ड' : 'Dashboard') : (currentLang === 'mr' ? 'नकाशा' : 'Farm Map')}</span>
+          <span>🗺️ {activeTab === 'farm_map' || activeTab === 'zone_details' ? (currentLang === 'mr' ? 'डॅशबोर्ड' : 'Dashboard') : (currentLang === 'mr' ? 'नकाशा' : 'Farm Map')}</span>
         </button>
         <button
           onClick={() => setIsPhoneFrame(!isPhoneFrame)}
@@ -161,10 +178,11 @@ export default function App() {
         <Header
           title={headerInfo.title}
           subtitle={headerInfo.subtitle}
-          showBack={currentScreen === 'register' || currentScreen === 'farm_setup' || activeTab === 'farm_map'}
+          showBack={currentScreen === 'register' || currentScreen === 'farm_setup' || activeTab === 'farm_map' || activeTab === 'zone_details'}
           onBack={() => {
             if (currentScreen === 'register') setCurrentScreen('welcome');
             else if (currentScreen === 'farm_setup') setCurrentScreen('register');
+            else if (activeTab === 'zone_details') setActiveTab('farm_map');
             else if (activeTab === 'farm_map') setActiveTab('dashboard');
           }}
           currentLang={currentLang}
@@ -217,10 +235,11 @@ export default function App() {
               )}
 
               {activeTab === 'irrigation' && (
-                <Irrigation
-                  farmData={farmData}
-                  t={t}
+                <IrrigationPlannerPage
+                  farmId={selectedFarmId}
+                  initialZoneId={selectedZoneId}
                   currentLang={currentLang}
+                  onBack={() => setActiveTab('dashboard')}
                 />
               )}
 
@@ -248,7 +267,21 @@ export default function App() {
                   currentLang={currentLang}
                   onBack={() => setActiveTab('dashboard')}
                   onNavigateZoneDetails={(zone) => {
-                    // Pre-hook for Zone Details
+                    setSelectedZoneId(zone.id);
+                    setSelectedFarmId(zone.farm_id);
+                    setActiveTab('zone_details');
+                  }}
+                />
+              )}
+
+              {activeTab === 'zone_details' && (
+                <ZoneDetailsPage
+                  zoneId={selectedZoneId || 'z1-north-west-001'}
+                  farmId={selectedFarmId}
+                  currentLang={currentLang}
+                  onBack={() => setActiveTab('farm_map')}
+                  onNavigateIrrigationPlanner={(rec) => {
+                    setActiveTab('irrigation');
                   }}
                 />
               )}
