@@ -21,7 +21,7 @@ from app.ingestion.providers.sentinel2_stac import Sentinel2STACProvider
 from app.ingestion.providers.soil_provider import SoilMeasurementProvider
 from app.models.observation import Observation
 from app.models.farm import Farm, FarmZone
-from app.services.observation_service import create_observation
+from app.services.observation_service import bulk_create_observations
 from app.intelligence.features.crop import CropFeatures
 from app.intelligence.features.feature_builder import (
     MultimodalZoneFeatureSet,
@@ -82,9 +82,13 @@ class IngestionPipeline:
 
         persisted_records: List[Observation] = []
         if db is not None and farm_id is not None:
-            for obs_in in obs_creates + soil_obs:
-                created = create_observation(db=db, farm_id=farm_id, obs_in=obs_in)
-                persisted_records.append(created)
+            batch = obs_creates + soil_obs
+            if batch:
+                persisted_records = bulk_create_observations(
+                    db=db,
+                    farm_id=farm_id,
+                    observations_in=batch,
+                )
 
         return persisted_records, weather_features, soil_features
 
@@ -129,9 +133,12 @@ class IngestionPipeline:
 
         persisted_records: List[Observation] = []
         if db is not None and farm_id is not None:
-            for obs_in in obs_creates:
-                created = create_observation(db=db, farm_id=farm_id, obs_in=obs_in)
-                persisted_records.append(created)
+            if obs_creates:
+                persisted_records = bulk_create_observations(
+                    db=db,
+                    farm_id=farm_id,
+                    observations_in=obs_creates,
+                )
 
         return persisted_records, veg_features
 
@@ -168,9 +175,12 @@ class IngestionPipeline:
 
         persisted_records: List[Observation] = []
         if db is not None and farm_id is not None:
-            for obs_in in obs_creates:
-                created = create_observation(db=db, farm_id=farm_id, obs_in=obs_in)
-                persisted_records.append(created)
+            if obs_creates:
+                persisted_records = bulk_create_observations(
+                    db=db,
+                    farm_id=farm_id,
+                    observations_in=obs_creates,
+                )
 
         return persisted_records, soil_features
 

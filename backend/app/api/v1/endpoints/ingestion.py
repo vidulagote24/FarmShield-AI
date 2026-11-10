@@ -1,12 +1,17 @@
 """API v1 Endpoints for Data Ingestion pipelines."""
 
 from datetime import datetime, timezone
+import math
+import threading
 import time
 from typing import Any, Dict, List, Optional, Tuple
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from geoalchemy2.shape import to_shape
+import numpy as np
 from pydantic import BaseModel, Field
+import pyproj
+import shapely
 import shapely.geometry
 from sqlalchemy.orm import Session
 
@@ -19,12 +24,37 @@ router = APIRouter(prefix="/ingestion", tags=["Data Ingestion"])
 pipeline = IngestionPipeline()
 
 # Cache for /status endpoint to throttle external network calls and protect provider quotas.
-# Trade-off Analysis:
-# - In-memory cache is thread-safe under GIL and adds zero external infrastructure dependency.
-# - TTL of 60 seconds prevents polling abuse and rate-limit exhaustion against free-tier Open-Meteo & Element84 STAC APIs.
-# - In a multi-worker deployment, each worker maintains its own 60s cache; for clustered scale-out, Redis would replace this.
+# Architectural & Concurrency Strategy:
+# 1. Thread Synchronization: _STATUS_CACHE_LOCK with double-checked locking guarantees that
+#    concurrent requests during cache expiry do not trigger redundant external HTTP probes.
+# 2. Scope & Boundaries: This in-memory cache is local to the operating process/worker.
+#    In multi-worker deployments (e.g. uvicorn --workers > 1), each worker maintains an independent
+#    60s cache window. For a distributed cluster, a Redis-backed cache would be required.
+#    Since no Redis broker is configured in FarmShield MVP, this thread-safe in-memory cache provides
+#    immediate rate-limit protection with zero infrastructure dependencies.
 _STATUS_CACHE: Dict[str, Any] = {"timestamp": 0.0, "data": None}
 _CACHE_TTL_SECONDS = 60.0
+_STATUS_CACHE_LOCK = threading.Lock()
+
+
+def _reproject_geometry(
+    geom: shapely.geometry.base.BaseGeometry,
+    from_srid: int,
+    to_srid: int = 4326,
+) -> shapely.geometry.base.BaseGeometry:
+    """Reproject a Shapely geometry from from_srid to to_srid (default WGS84 4326)."""
+    if from_srid == to_srid:
+        return geom
+    try:
+        transformer = pyproj.Transformer.from_crs(f"EPSG:{from_srid}", f"EPSG:{to_srid}", always_xy=True)
+    except Exception as exc:
+        raise ValueError(f"Invalid or unsupported CRS SRID {from_srid}: {exc}") from exc
+
+    def _project(coords: np.ndarray) -> np.ndarray:
+        x, y = transformer.transform(coords[:, 0], coords[:, 1])
+        return np.column_stack([x, y])
+
+    return shapely.transform(geom, _project)
 
 
 def validate_farm_and_zone_access(
@@ -43,6 +73,7 @@ def validate_farm_and_zone_access(
     4. Verify user ownership/access using check_farm_ownership (403 Forbidden if unauthorized).
     5. Retrieve zone if supplied (404 Not Found if missing).
     6. Verify zone belongs to farm (400 Bad Request if zone does not belong to farm).
+       If zone supplied without farm_id, parent farm is resolved and verified against user ownership.
     7. Reject invalid combinations before calling external providers or persisting observations.
 
     Args:
@@ -88,12 +119,12 @@ def validate_farm_and_zone_access(
                     detail=f"Zone '{zone_id}' does not belong to farm '{farm.id}'.",
                 )
         else:
-            # zone provided without farm_id: retrieve parent farm and verify ownership
+            # Zone provided without farm_id: retrieve parent farm and verify ownership without leaking metadata
             farm = db.query(Farm).filter(Farm.id == zone.farm_id).first()
             if not farm:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Parent farm '{zone.farm_id}' for zone '{zone_id}' was not found.",
+                    detail="Parent farm for the specified zone was not found.",
                 )
             check_farm_ownership(farm, current_user)
 
@@ -109,9 +140,10 @@ def validate_satellite_bbox_within_farm(
     Checks:
     - Bbox coordinates ordering: min_lon < max_lon and min_lat < max_lat.
     - Physical coordinate limits: -180 <= lon <= 180 and -90 <= lat <= 90.
-    - Complete containment within the farm MultiPolygon boundary.
+    - Finite coordinate values (rejects NaN and +/-Infinity).
+    - Inspection and reprojection of farm boundary CRS (WGS84 EPSG:4326 canonical).
+    - Complete containment within the farm MultiPolygon boundary (no silent clipping).
     - Rejects out-of-bound or partially outside requests with 400 Bad Request.
-    - Never silently clips boundaries.
 
     Args:
         bbox: [min_lon, min_lat, max_lon, max_lat]
@@ -123,9 +155,17 @@ def validate_satellite_bbox_within_farm(
             detail="Bounding box must contain exactly 4 coordinates: [min_lon, min_lat, max_lon, max_lat].",
         )
 
+    # 1. Finite coordinate check
+    for coord in bbox:
+        if not isinstance(coord, (int, float)) or not math.isfinite(coord):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Bounding box coordinates must be finite real numbers; received {coord}.",
+            )
+
     min_lon, min_lat, max_lon, max_lat = bbox
 
-    # 1. Physical coordinate limits
+    # 2. Physical coordinate limits
     if not (-180.0 <= min_lon <= 180.0 and -180.0 <= max_lon <= 180.0):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -137,7 +177,7 @@ def validate_satellite_bbox_within_farm(
             detail=f"Bounding box latitude out of valid range [-90, 90]: min_lat={min_lat}, max_lat={max_lat}.",
         )
 
-    # 2. Coordinate ordering: min must be strictly less than max
+    # 3. Coordinate ordering: min must be strictly less than max
     if min_lon >= max_lon:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -149,7 +189,14 @@ def validate_satellite_bbox_within_farm(
             detail=f"Invalid bounding box coordinate ordering: min_lat ({min_lat}) must be strictly less than max_lat ({max_lat}).",
         )
 
-    # 3. Spatial containment check against farm boundary (supports Polygon and MultiPolygon)
+    # 4. SRID Inspection & Geometry Decoding
+    srid = getattr(farm.boundary, "srid", 4326)
+    if srid is None or srid <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Farm boundary has missing or invalid SRID ({srid}).",
+        )
+
     try:
         farm_shape = to_shape(farm.boundary)
     except Exception as exc:
@@ -158,6 +205,25 @@ def validate_satellite_bbox_within_farm(
             detail=f"Failed to decode farm spatial boundary: {exc}",
         )
 
+    if not farm_shape.is_valid:
+        farm_shape = farm_shape.buffer(0)
+        if not farm_shape.is_valid or farm_shape.is_empty:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Farm boundary geometry is topologically invalid.",
+            )
+
+    # 5. Transform farm geometry to canonical WGS84 (EPSG:4326) if stored in a different projection
+    if srid != 4326:
+        try:
+            farm_shape = _reproject_geometry(farm_shape, from_srid=srid, to_srid=4326)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unsupported spatial reference system (SRID {srid}) on farm boundary: {exc}",
+            )
+
+    # 6. Containment testing (supports Polygon and MultiPolygon)
     bbox_shape = shapely.geometry.box(min_lon, min_lat, max_lon, max_lat)
 
     if not farm_shape.covers(bbox_shape):
@@ -208,32 +274,59 @@ class SoilSensorIngestRequest(BaseModel):
 def get_providers_status(
     current_user: User = Depends(get_current_active_user),
 ) -> Dict[str, Any]:
-    """Return health check status across all external providers with 60s cache protection."""
+    """Return health check status across all external providers with synchronized 60s cache protection.
+
+    Architecture & Multi-Worker Concurrency Note:
+    - Thread synchronization (_STATUS_CACHE_LOCK) with double-checked locking ensures that concurrent
+      requests during cache expiration only trigger one external probe across threads.
+    - Important: This cache is in-process memory. In a multi-worker process deployment (e.g., uvicorn with N workers),
+      each worker process maintains its own independent 60-second cache. For single-worker or low-worker hackathon
+      deployments, this completely eliminates redundant provider requests without adding external Redis dependencies.
+      In a distributed multi-node cluster, a centralized cache (such as Redis) should be introduced.
+    """
     now = time.time()
     if _STATUS_CACHE["data"] is not None and (now - _STATUS_CACHE["timestamp"]) < _CACHE_TTL_SECONDS:
         return _STATUS_CACHE["data"]
 
-    status_data = {
-        "status": "operational",
-        "cached_at": datetime.now(timezone.utc).isoformat(),
-        "providers": {
-            "open_meteo": {
-                "name": pipeline.weather_provider.provider_name,
-                "reachable": pipeline.weather_provider.health_check(),
-            },
-            "sentinel2_stac": {
-                "name": pipeline.satellite_provider.provider_name,
-                "reachable": pipeline.satellite_provider.health_check(),
-            },
-            "soil_adapter": {
-                "name": pipeline.soil_provider.provider_name,
-                "reachable": pipeline.soil_provider.health_check(),
-            },
-        },
-    }
-    _STATUS_CACHE["timestamp"] = now
-    _STATUS_CACHE["data"] = status_data
-    return status_data
+    with _STATUS_CACHE_LOCK:
+        now = time.time()
+        if _STATUS_CACHE["data"] is not None and (now - _STATUS_CACHE["timestamp"]) < _CACHE_TTL_SECONDS:
+            return _STATUS_CACHE["data"]
+
+        providers_status: Dict[str, Any] = {}
+        all_operational = True
+
+        for key, provider in [
+            ("open_meteo", pipeline.weather_provider),
+            ("sentinel2_stac", pipeline.satellite_provider),
+            ("soil_adapter", pipeline.soil_provider),
+        ]:
+            try:
+                reachable = bool(provider.health_check())
+                error_msg = None
+            except Exception as exc:
+                reachable = False
+                error_msg = str(exc)
+
+            if not reachable:
+                all_operational = False
+
+            providers_status[key] = {
+                "name": provider.provider_name,
+                "reachable": reachable,
+                "error": error_msg,
+            }
+
+        overall_status = "operational" if all_operational else "degraded"
+
+        status_data = {
+            "status": overall_status,
+            "cached_at": datetime.now(timezone.utc).isoformat(),
+            "providers": providers_status,
+        }
+        _STATUS_CACHE["timestamp"] = now
+        _STATUS_CACHE["data"] = status_data
+        return status_data
 
 
 @router.post(
@@ -247,7 +340,7 @@ def ingest_weather(
     current_user: User = Depends(get_current_active_user),
 ) -> Dict[str, Any]:
     """Ingest meteorological forecast for given coordinates with ownership validation."""
-    validate_farm_and_zone_access(
+    farm, zone = validate_farm_and_zone_access(
         db=db,
         current_user=current_user,
         farm_id=req.farm_id,
@@ -258,8 +351,8 @@ def ingest_weather(
     persisted, weather_features, soil_features = pipeline.ingest_weather_for_coordinates(
         latitude=req.latitude,
         longitude=req.longitude,
-        farm_id=req.farm_id,
-        zone_id=req.zone_id,
+        farm_id=farm.id if farm else None,
+        zone_id=zone.id if zone else None,
         db=db,
         forecast_days=req.forecast_days,
     )
@@ -309,8 +402,8 @@ def ingest_satellite(
         bbox=req.bbox,
         start_date=req.start_date,
         end_date=req.end_date,
-        farm_id=req.farm_id,
-        zone_id=req.zone_id,
+        farm_id=farm.id,
+        zone_id=zone.id if zone else None,
         db=db,
         max_cloud_cover_pct=req.max_cloud_cover_pct,
     )
@@ -340,7 +433,7 @@ def ingest_soil_reading(
     current_user: User = Depends(get_current_active_user),
 ) -> Dict[str, Any]:
     """Ingest soil sensor reading with ownership validation."""
-    validate_farm_and_zone_access(
+    farm, zone = validate_farm_and_zone_access(
         db=db,
         current_user=current_user,
         farm_id=req.farm_id,
@@ -355,8 +448,8 @@ def ingest_soil_reading(
         depth_max_cm=req.depth_max_cm,
         volumetric_water_content=req.volumetric_water_content_m3_m3,
         observed_at=obs_time,
-        farm_id=req.farm_id,
-        zone_id=req.zone_id,
+        farm_id=farm.id if farm else None,
+        zone_id=zone.id if zone else None,
         db=db,
     )
 
