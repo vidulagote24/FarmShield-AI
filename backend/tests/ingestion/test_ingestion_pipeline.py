@@ -9,8 +9,8 @@ from app.ingestion.pipelines.pipeline import IngestionPipeline
 from app.models.farm import Farm, FarmZone
 from app.models.observation import Observation
 from app.models.user import User
-from backend.app.intelligence.features.crop import CropFeatures
-from backend.app.intelligence.types import (
+from app.intelligence.features.crop import CropFeatures
+from app.intelligence.types import (
     DataQualityStatus,
     ProvenanceType,
     SoilTextureClass,

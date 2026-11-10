@@ -22,15 +22,15 @@ from app.ingestion.providers.soil_provider import SoilMeasurementProvider
 from app.models.observation import Observation
 from app.models.farm import Farm, FarmZone
 from app.services.observation_service import create_observation
-from backend.app.intelligence.features.crop import CropFeatures
-from backend.app.intelligence.features.feature_builder import (
+from app.intelligence.features.crop import CropFeatures
+from app.intelligence.features.feature_builder import (
     MultimodalZoneFeatureSet,
     build_zone_feature_set,
 )
-from backend.app.intelligence.features.soil import SoilFeatures
-from backend.app.intelligence.features.vegetation import ZoneVegetationFeatures
-from backend.app.intelligence.features.weather import WeatherFeatures
-from backend.app.intelligence.types import SoilTextureClass, ZoneRasterStats
+from app.intelligence.features.soil import SoilFeatures
+from app.intelligence.features.vegetation import ZoneVegetationFeatures
+from app.intelligence.features.weather import WeatherFeatures
+from app.intelligence.types import SoilTextureClass, ZoneRasterStats
 
 
 class IngestionPipeline:

@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import uuid
 
 from app.schemas.observation import ObservationCreate
-from backend.app.intelligence.features.vegetation import ZoneVegetationFeatures
-from backend.app.intelligence.types import (
+from app.intelligence.features.vegetation import ZoneVegetationFeatures
+from app.intelligence.types import (
     DataQualityStatus,
     ProvenanceType,
     ZoneRasterStats,

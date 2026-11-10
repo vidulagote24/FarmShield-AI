@@ -5,12 +5,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import uuid
 
 from app.schemas.observation import ObservationCreate
-from backend.app.intelligence.features.weather import (
+from app.intelligence.features.weather import (
     HourlyWeatherReading,
     WeatherFeatures,
     aggregate_hourly_weather,
 )
-from backend.app.intelligence.types import (
+from app.intelligence.types import (
     MeasurementHeightProvenance,
     ProvenanceType,
     SolarIrradianceType,

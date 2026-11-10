@@ -1,19 +1,176 @@
 """API v1 Endpoints for Data Ingestion pipelines."""
 
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+import time
+from typing import Any, Dict, List, Optional, Tuple
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from geoalchemy2.shape import to_shape
 from pydantic import BaseModel, Field
+import shapely.geometry
 from sqlalchemy.orm import Session
 
 from app.api.deps import check_farm_ownership, get_current_active_user, get_db
 from app.ingestion.pipelines.pipeline import IngestionPipeline
-from app.models.farm import Farm
+from app.models.farm import Farm, FarmZone
 from app.models.user import User
 
 router = APIRouter(prefix="/ingestion", tags=["Data Ingestion"])
 pipeline = IngestionPipeline()
+
+# Cache for /status endpoint to throttle external network calls and protect provider quotas.
+# Trade-off Analysis:
+# - In-memory cache is thread-safe under GIL and adds zero external infrastructure dependency.
+# - TTL of 60 seconds prevents polling abuse and rate-limit exhaustion against free-tier Open-Meteo & Element84 STAC APIs.
+# - In a multi-worker deployment, each worker maintains its own 60s cache; for clustered scale-out, Redis would replace this.
+_STATUS_CACHE: Dict[str, Any] = {"timestamp": 0.0, "data": None}
+_CACHE_TTL_SECONDS = 60.0
+
+
+def validate_farm_and_zone_access(
+    db: Session,
+    current_user: User,
+    farm_id: Optional[uuid.UUID],
+    zone_id: Optional[uuid.UUID],
+    require_farm: bool = False,
+) -> Tuple[Optional[Farm], Optional[FarmZone]]:
+    """Enforce the strict 7-step farm and zone ownership validation sequence.
+
+    Sequence:
+    1. Authenticate user (enforced upstream via get_current_active_user).
+    2. Retrieve farm if farm_id is provided or required.
+    3. Verify farm exists (404 Not Found if missing).
+    4. Verify user ownership/access using check_farm_ownership (403 Forbidden if unauthorized).
+    5. Retrieve zone if supplied (404 Not Found if missing).
+    6. Verify zone belongs to farm (400 Bad Request if zone does not belong to farm).
+    7. Reject invalid combinations before calling external providers or persisting observations.
+
+    Args:
+        db: Active database session.
+        current_user: Currently authenticated active user.
+        farm_id: Optional target Farm UUID.
+        zone_id: Optional target FarmZone UUID.
+        require_farm: If True, farm_id must be provided (raises 400 Bad Request if absent).
+
+    Returns:
+        Tuple of (Farm or None, FarmZone or None).
+    """
+    farm: Optional[Farm] = None
+    zone: Optional[FarmZone] = None
+
+    if require_farm and not farm_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="farm_id is required for this operation.",
+        )
+
+    if farm_id:
+        farm = db.query(Farm).filter(Farm.id == farm_id).first()
+        if not farm:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Farm '{farm_id}' was not found.",
+            )
+        check_farm_ownership(farm, current_user)
+
+    if zone_id:
+        zone = db.query(FarmZone).filter(FarmZone.id == zone_id).first()
+        if not zone:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Zone '{zone_id}' was not found.",
+            )
+
+        if farm:
+            if zone.farm_id != farm.id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Zone '{zone_id}' does not belong to farm '{farm.id}'.",
+                )
+        else:
+            # zone provided without farm_id: retrieve parent farm and verify ownership
+            farm = db.query(Farm).filter(Farm.id == zone.farm_id).first()
+            if not farm:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Parent farm '{zone.farm_id}' for zone '{zone_id}' was not found.",
+                )
+            check_farm_ownership(farm, current_user)
+
+    return farm, zone
+
+
+def validate_satellite_bbox_within_farm(
+    bbox: List[float],
+    farm: Farm,
+) -> None:
+    """Validate bounding box coordinate ranges, ordering, and containment within farm boundary.
+
+    Checks:
+    - Bbox coordinates ordering: min_lon < max_lon and min_lat < max_lat.
+    - Physical coordinate limits: -180 <= lon <= 180 and -90 <= lat <= 90.
+    - Complete containment within the farm MultiPolygon boundary.
+    - Rejects out-of-bound or partially outside requests with 400 Bad Request.
+    - Never silently clips boundaries.
+
+    Args:
+        bbox: [min_lon, min_lat, max_lon, max_lat]
+        farm: Farm model instance with PostGIS boundary.
+    """
+    if len(bbox) != 4:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Bounding box must contain exactly 4 coordinates: [min_lon, min_lat, max_lon, max_lat].",
+        )
+
+    min_lon, min_lat, max_lon, max_lat = bbox
+
+    # 1. Physical coordinate limits
+    if not (-180.0 <= min_lon <= 180.0 and -180.0 <= max_lon <= 180.0):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Bounding box longitude out of valid range [-180, 180]: min_lon={min_lon}, max_lon={max_lon}.",
+        )
+    if not (-90.0 <= min_lat <= 90.0 and -90.0 <= max_lat <= 90.0):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Bounding box latitude out of valid range [-90, 90]: min_lat={min_lat}, max_lat={max_lat}.",
+        )
+
+    # 2. Coordinate ordering: min must be strictly less than max
+    if min_lon >= max_lon:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid bounding box coordinate ordering: min_lon ({min_lon}) must be strictly less than max_lon ({max_lon}).",
+        )
+    if min_lat >= max_lat:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid bounding box coordinate ordering: min_lat ({min_lat}) must be strictly less than max_lat ({max_lat}).",
+        )
+
+    # 3. Spatial containment check against farm boundary (supports Polygon and MultiPolygon)
+    try:
+        farm_shape = to_shape(farm.boundary)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to decode farm spatial boundary: {exc}",
+        )
+
+    bbox_shape = shapely.geometry.box(min_lon, min_lat, max_lon, max_lat)
+
+    if not farm_shape.covers(bbox_shape):
+        if farm_shape.intersects(bbox_shape):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Requested bounding box extends outside the farm boundary. Bounding box must be fully contained within the farm.",
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Requested bounding box is completely outside the farm boundary.",
+            )
 
 
 class WeatherIngestRequest(BaseModel):
@@ -25,10 +182,10 @@ class WeatherIngestRequest(BaseModel):
 
 
 class SatelliteIngestRequest(BaseModel):
+    farm_id: uuid.UUID = Field(..., description="Target Farm UUID (required for boundary containment)")
     bbox: List[float] = Field(..., min_length=4, max_length=4, description="[min_lon, min_lat, max_lon, max_lat]")
     start_date: str = Field(..., description="Start date YYYY-MM-DD")
     end_date: str = Field(..., description="End date YYYY-MM-DD")
-    farm_id: Optional[uuid.UUID] = Field(default=None, description="Optional Farm UUID for persistence")
     zone_id: Optional[uuid.UUID] = Field(default=None, description="Optional Zone UUID for persistence")
     max_cloud_cover_pct: float = Field(default=40.0, ge=0.0, le=100.0)
 
@@ -46,12 +203,19 @@ class SoilSensorIngestRequest(BaseModel):
 @router.get(
     "/status",
     summary="Data Ingestion Providers Status",
-    description="Check reachability and operational status of external data ingestion providers.",
+    description="Check reachability and operational status of external data ingestion providers (cached for 60s, requires authentication).",
 )
-def get_providers_status() -> Dict[str, Any]:
-    """Return health check status across all external providers."""
-    return {
+def get_providers_status(
+    current_user: User = Depends(get_current_active_user),
+) -> Dict[str, Any]:
+    """Return health check status across all external providers with 60s cache protection."""
+    now = time.time()
+    if _STATUS_CACHE["data"] is not None and (now - _STATUS_CACHE["timestamp"]) < _CACHE_TTL_SECONDS:
+        return _STATUS_CACHE["data"]
+
+    status_data = {
         "status": "operational",
+        "cached_at": datetime.now(timezone.utc).isoformat(),
         "providers": {
             "open_meteo": {
                 "name": pipeline.weather_provider.provider_name,
@@ -67,6 +231,9 @@ def get_providers_status() -> Dict[str, Any]:
             },
         },
     }
+    _STATUS_CACHE["timestamp"] = now
+    _STATUS_CACHE["data"] = status_data
+    return status_data
 
 
 @router.post(
@@ -79,15 +246,14 @@ def ingest_weather(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> Dict[str, Any]:
-    """Ingest meteorological forecast for given coordinates."""
-    if req.farm_id:
-        farm = db.query(Farm).filter(Farm.id == req.farm_id).first()
-        if not farm:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Farm '{req.farm_id}' was not found.",
-            )
-        check_farm_ownership(farm, current_user)
+    """Ingest meteorological forecast for given coordinates with ownership validation."""
+    validate_farm_and_zone_access(
+        db=db,
+        current_user=current_user,
+        farm_id=req.farm_id,
+        zone_id=req.zone_id,
+        require_farm=False,
+    )
 
     persisted, weather_features, soil_features = pipeline.ingest_weather_for_coordinates(
         latitude=req.latitude,
@@ -129,15 +295,15 @@ def ingest_satellite(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> Dict[str, Any]:
-    """Search and ingest Sentinel-2 metadata."""
-    if req.farm_id:
-        farm = db.query(Farm).filter(Farm.id == req.farm_id).first()
-        if not farm:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Farm '{req.farm_id}' was not found.",
-            )
-        check_farm_ownership(farm, current_user)
+    """Search and ingest Sentinel-2 metadata with boundary containment validation."""
+    farm, zone = validate_farm_and_zone_access(
+        db=db,
+        current_user=current_user,
+        farm_id=req.farm_id,
+        zone_id=req.zone_id,
+        require_farm=True,
+    )
+    validate_satellite_bbox_within_farm(req.bbox, farm)
 
     persisted, veg_features = pipeline.ingest_satellite_for_bbox(
         bbox=req.bbox,
@@ -173,15 +339,14 @@ def ingest_soil_reading(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> Dict[str, Any]:
-    """Ingest soil sensor reading."""
-    if req.farm_id:
-        farm = db.query(Farm).filter(Farm.id == req.farm_id).first()
-        if not farm:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Farm '{req.farm_id}' was not found.",
-            )
-        check_farm_ownership(farm, current_user)
+    """Ingest soil sensor reading with ownership validation."""
+    validate_farm_and_zone_access(
+        db=db,
+        current_user=current_user,
+        farm_id=req.farm_id,
+        zone_id=req.zone_id,
+        require_farm=False,
+    )
 
     obs_time = req.observed_at or datetime.now(timezone.utc)
     persisted, soil_features = pipeline.ingest_soil_sensor_reading(

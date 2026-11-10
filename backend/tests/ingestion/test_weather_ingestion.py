@@ -8,7 +8,7 @@ from app.ingestion.normalizers.weather_normalizer import (
     normalize_open_meteo_weather,
 )
 from app.ingestion.providers.open_meteo import OpenMeteoProvider
-from backend.app.intelligence.types import DataQualityStatus, ProvenanceType
+from app.intelligence.types import DataQualityStatus, ProvenanceType
 
 
 SAMPLE_WEATHER_FIXTURE = {

@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import uuid
 
 from app.schemas.observation import ObservationCreate
-from backend.app.intelligence.features.soil import SoilFeatures
-from backend.app.intelligence.types import (
+from app.intelligence.features.soil import SoilFeatures
+from app.intelligence.types import (
     DataQualityStatus,
     ProvenanceType,
     SoilTextureClass,

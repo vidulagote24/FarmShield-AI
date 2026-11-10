@@ -9,7 +9,7 @@ from app.ingestion.normalizers.soil_normalizer import (
     normalize_sensor_soil_reading,
 )
 from app.ingestion.providers.soil_provider import SoilMeasurementProvider
-from backend.app.intelligence.types import DataQualityStatus, ProvenanceType, SoilTextureClass
+from app.intelligence.types import DataQualityStatus, ProvenanceType, SoilTextureClass
 
 
 def test_sensor_soil_reading_normalization():

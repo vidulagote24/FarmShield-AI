@@ -8,7 +8,7 @@ from app.ingestion.normalizers.satellite_normalizer import (
     normalize_sentinel2_vegetation,
 )
 from app.ingestion.providers.sentinel2_stac import Sentinel2STACProvider
-from backend.app.intelligence.types import (
+from app.intelligence.types import (
     DataQualityStatus,
     ProvenanceType,
     SpatialQualityStatus,
