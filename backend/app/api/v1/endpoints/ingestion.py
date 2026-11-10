@@ -202,7 +202,7 @@ def ingest_soil_reading(
             "source_provider": soil_features.source_provider,
             "provenance": soil_features.provenance_type.value,
             "depth_range_cm": [soil_features.depth_min_cm, soil_features.depth_max_cm],
-            "volumetric_water_content_m3_m3": soil_features.volumetric_water_content_m3_m3,
+            "volumetric_water_content_m3_m3": soil_features.soil_moisture_m3_m3,
             "field_capacity_m3_m3": soil_features.field_capacity_m3_m3,
             "wilting_point_m3_m3": soil_features.wilting_point_m3_m3,
             "observed_at": soil_features.observed_at.isoformat(),
