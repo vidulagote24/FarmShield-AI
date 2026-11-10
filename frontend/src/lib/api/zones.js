@@ -29,6 +29,13 @@ export const zonesApi = {
   },
 
   /**
+   * Alias for getZone by UUID
+   */
+  async getById(zoneId) {
+    return this.getZone(zoneId);
+  },
+
+  /**
    * Create a new zone inside a farm (must be spatially contained)
    * @param {string} farmId 
    * @param {Object} payload { zone_name, zone_code, boundary, metadata }

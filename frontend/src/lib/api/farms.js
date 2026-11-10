@@ -31,6 +31,13 @@ export const farmsApi = {
   },
 
   /**
+   * Alias for getFarm by UUID
+   */
+  async getById(farmId) {
+    return this.getFarm(farmId);
+  },
+
+  /**
    * Create a new farm with spatial boundary
    * @param {Object} payload { name, description, location_name, crop_type, crop_variety, sowing_date, boundary }
    */

@@ -64,7 +64,21 @@ export function useIrrigationPlanner(initialFarmId = null, initialZoneId = null)
     // LIVE REST API MODE
     // -------------------------------------------------------------
     try {
-      const effectiveFarmId = initialFarmId || 'f8a1c9e2-4b3d-4e5f-8a1b-2c3d4e5f6a7b';
+      let effectiveFarmId = initialFarmId;
+      if (!effectiveFarmId) {
+        const farmsList = await farmsApi.listFarms({ page: 1, page_size: 1 });
+        const items = farmsList?.items || (Array.isArray(farmsList) ? farmsList : []);
+        if (items.length > 0) {
+          effectiveFarmId = items[0].id;
+        } else {
+          setFarm(null);
+          setZones([]);
+          setRecommendations([]);
+          setHistory([]);
+          setLoading(false);
+          return;
+        }
+      }
 
       // 1. Fetch farm details
       try {
@@ -80,6 +94,10 @@ export function useIrrigationPlanner(initialFarmId = null, initialZoneId = null)
         const zonesRes = await zonesApi.listFarmZones(effectiveFarmId);
         zoneItems = zonesRes.items || (Array.isArray(zonesRes) ? zonesRes : []);
         setZones(zoneItems);
+        // If the initially selected zone does not exist in the active farm's zones, default to all zones
+        if (selectedZoneId && zoneItems.length > 0 && !zoneItems.some((z) => z.id === selectedZoneId)) {
+          setSelectedZoneId(null);
+        }
       } catch (zErr) {
         console.warn('[useIrrigationPlanner] Zones query warning:', zErr.message);
       }
