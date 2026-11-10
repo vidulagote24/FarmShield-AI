@@ -52,3 +52,4 @@ export const observationsApi = {
 };
 
 export default observationsApi;
+

@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Irrigation from './pages/Irrigation';
 import Crops from './pages/Crops';
 import Profile from './pages/Profile';
+import FarmMapPage from './features/farm-map/pages/FarmMapPage';
 import { Smartphone, Monitor } from 'lucide-react';
 
 export default function App() {
@@ -74,6 +75,12 @@ export default function App() {
     if (activeTab === 'profile') {
       return { title: t.nav.profile, subtitle: 'खाते व शेत तपशील' };
     }
+    if (activeTab === 'farm_map') {
+      return { 
+        title: 'FarmShield AI', 
+        subtitle: currentLang === 'mr' ? 'शेताचा डिजिटल नकाशा (४ विभाग)' : 'Farm Digital Twin (4 Zones)' 
+      };
+    }
     return { title: 'FarmShield AI' };
   };
 
@@ -86,6 +93,26 @@ export default function App() {
         <span style={{ fontSize: '12px', fontWeight: 800, color: '#C5F36B', display: 'flex', alignItems: 'center', gap: '5px' }}>
           <span>🌾</span> FarmShield AI Glassmorphic Preview
         </span>
+        <button
+          onClick={() => setActiveTab(activeTab === 'farm_map' ? 'dashboard' : 'farm_map')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            background: activeTab === 'farm_map' ? 'rgba(197, 243, 107, 0.25)' : 'rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(10px)',
+            color: activeTab === 'farm_map' ? '#C5F36B' : '#FFFFFF',
+            border: activeTab === 'farm_map' ? '1px solid #C5F36B' : '1px solid rgba(255, 255, 255, 0.2)',
+            padding: '5px 12px',
+            borderRadius: '16px',
+            fontSize: '11.5px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <span>🗺️ {activeTab === 'farm_map' ? (currentLang === 'mr' ? 'डॅशबोर्ड' : 'Dashboard') : (currentLang === 'mr' ? 'नकाशा' : 'Farm Map')}</span>
+        </button>
         <button
           onClick={() => setIsPhoneFrame(!isPhoneFrame)}
           style={{
@@ -134,10 +161,11 @@ export default function App() {
         <Header
           title={headerInfo.title}
           subtitle={headerInfo.subtitle}
-          showBack={currentScreen === 'register' || currentScreen === 'farm_setup'}
+          showBack={currentScreen === 'register' || currentScreen === 'farm_setup' || activeTab === 'farm_map'}
           onBack={() => {
             if (currentScreen === 'register') setCurrentScreen('welcome');
-            if (currentScreen === 'farm_setup') setCurrentScreen('register');
+            else if (currentScreen === 'farm_setup') setCurrentScreen('register');
+            else if (activeTab === 'farm_map') setActiveTab('dashboard');
           }}
           currentLang={currentLang}
           onToggleLang={cycleLanguage}
@@ -212,6 +240,16 @@ export default function App() {
                   currentLang={currentLang}
                   onChangeLang={(code) => setCurrentLang(code)}
                   t={t}
+                />
+              )}
+
+              {activeTab === 'farm_map' && (
+                <FarmMapPage
+                  currentLang={currentLang}
+                  onBack={() => setActiveTab('dashboard')}
+                  onNavigateZoneDetails={(zone) => {
+                    // Pre-hook for Zone Details
+                  }}
                 />
               )}
             </>
