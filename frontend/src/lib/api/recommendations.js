@@ -11,7 +11,7 @@ export const recommendationsApi = {
   /**
    * List recommendations for a farm with filtering and pagination
    */
-  async listFarmRecommendations(farmId, params = {}) {
+  async listFarmRecommendations(farmId, params = {}, options = {}) {
     const query = new URLSearchParams();
     if (params.zone_id) query.append('zone_id', params.zone_id);
     if (params.status) query.append('status', params.status);
@@ -25,7 +25,7 @@ export const recommendationsApi = {
     const endpoint = queryString 
       ? `/farms/${farmId}/recommendations?${queryString}` 
       : `/farms/${farmId}/recommendations`;
-    return apiClient.get(endpoint);
+    return apiClient.get(endpoint, options);
   },
 
   /**

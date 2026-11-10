@@ -118,6 +118,60 @@ server.listen(PORT, '127.0.0.1', async () => {
       insightsUrl,
     ]);
     console.log(`✓ Farm Insights Mobile saved: ${insightsMobile}`);
+
+    // Task 11.2 Alerts & History Screenshots
+    const alertsUrl = `http://127.0.0.1:${PORT}/?tab=alerts`;
+    const alertsDesktop = path.join(screenshotsDir, 'alerts_history_desktop.png');
+    const alertsMobile = path.join(screenshotsDir, 'alerts_history_mobile.png');
+
+    console.log('Capturing Alerts & History Desktop Screenshot (1280x960)...');
+    await runCommand(chromePath, [
+      '--headless=new',
+      '--disable-gpu',
+      '--no-sandbox',
+      '--window-size=1280,960',
+      '--virtual-time-budget=3000',
+      `--screenshot=${alertsDesktop}`,
+      alertsUrl,
+    ]);
+    console.log(`✓ Alerts & History Desktop saved: ${alertsDesktop}`);
+
+    console.log('Capturing Alerts & History Mobile Screenshot (390x844)...');
+    await runCommand(chromePath, [
+      '--headless=new',
+      '--disable-gpu',
+      '--no-sandbox',
+      '--window-size=390,844',
+      '--virtual-time-budget=3000',
+      `--screenshot=${alertsMobile}`,
+      alertsUrl,
+    ]);
+    console.log(`✓ Alerts & History Mobile saved: ${alertsMobile}`);
+
+    // History Tab Screenshot
+    const historyUrl = `http://127.0.0.1:${PORT}/?tab=alerts&subtab=history`;
+    const historyDesktop = path.join(screenshotsDir, 'alerts_history_timeline_desktop.png');
+
+    console.log('Capturing History Timeline Desktop Screenshot (1280x960)...');
+    await runCommand(chromePath, [
+      '--headless=new',
+      '--disable-gpu',
+      '--no-sandbox',
+      '--window-size=1280,960',
+      '--virtual-time-budget=3000',
+      `--screenshot=${historyDesktop}`,
+      historyUrl,
+    ]);
+    console.log(`✓ History Timeline Desktop saved: ${historyDesktop}`);
+
+    // Copy to brain artifacts directory
+    const artifactDir = 'C:\\Users\\Vidula Arun Gote\\.gemini\\antigravity\\brain\\a32b4802-3465-4d70-bd6e-3cfb3dca24c8';
+    if (fs.existsSync(artifactDir)) {
+      fs.copyFileSync(alertsDesktop, path.join(artifactDir, 'alerts_history_desktop.png'));
+      fs.copyFileSync(alertsMobile, path.join(artifactDir, 'alerts_history_mobile.png'));
+      fs.copyFileSync(historyDesktop, path.join(artifactDir, 'alerts_history_timeline_desktop.png'));
+      console.log('✓ Successfully copied screenshots to brain artifacts directory');
+    }
   } catch (err) {
     console.error('Capture error:', err);
   } finally {

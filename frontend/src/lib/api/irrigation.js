@@ -11,7 +11,7 @@ export const irrigationApi = {
   /**
    * Retrieve irrigation history for a farm with pagination
    */
-  async listFarmIrrigationEvents(farmId, params = {}) {
+  async listFarmIrrigationEvents(farmId, params = {}, options = {}) {
     const query = new URLSearchParams();
     if (params.zone_id) query.append('zone_id', params.zone_id);
     if (params.start_date) query.append('start_date', params.start_date);
@@ -23,7 +23,7 @@ export const irrigationApi = {
     const endpoint = queryString 
       ? `/farms/${farmId}/irrigation-events?${queryString}` 
       : `/farms/${farmId}/irrigation-events`;
-    return apiClient.get(endpoint);
+    return apiClient.get(endpoint, options);
   },
 
   /**

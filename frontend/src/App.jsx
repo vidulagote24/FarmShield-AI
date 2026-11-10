@@ -14,6 +14,7 @@ import ZoneDetailsPage from './features/zones/pages/ZoneDetailsPage';
 import IrrigationPlannerPage from './features/irrigation/pages/IrrigationPlannerPage';
 import RecommendationDetailsPage from './features/recommendations/pages/RecommendationDetailsPage';
 import FarmInsightsPage from './features/insights/pages/FarmInsightsPage';
+import AlertsHistoryPage from './features/alerts/pages/AlertsHistoryPage';
 import { Smartphone, Monitor } from 'lucide-react';
 
 export default function App() {
@@ -117,6 +118,12 @@ export default function App() {
         subtitle: currentLang === 'mr' ? 'शेत कल व विश्लेषण' : 'Farm Insights & Historical Trends'
       };
     }
+    if (activeTab === 'alerts') {
+      return {
+        title: 'FarmShield AI',
+        subtitle: currentLang === 'mr' ? 'इशारे व शेती इतिहास' : 'Alerts & Activity History'
+      };
+    }
     return { title: 'FarmShield AI' };
   };
 
@@ -170,6 +177,26 @@ export default function App() {
           <span>📈 {activeTab === 'insights' ? (currentLang === 'mr' ? 'डॅशबोर्ड' : 'Dashboard') : (currentLang === 'mr' ? 'कल विश्लेषण' : 'Insights')}</span>
         </button>
         <button
+          onClick={() => setActiveTab(activeTab === 'alerts' ? 'dashboard' : 'alerts')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            background: activeTab === 'alerts' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(10px)',
+            color: activeTab === 'alerts' ? '#FCA5A5' : '#FFFFFF',
+            border: activeTab === 'alerts' ? '1px solid #EF4444' : '1px solid rgba(255, 255, 255, 0.2)',
+            padding: '5px 12px',
+            borderRadius: '16px',
+            fontSize: '11.5px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <span>🔔 {activeTab === 'alerts' ? (currentLang === 'mr' ? 'डॅशबोर्ड' : 'Dashboard') : (currentLang === 'mr' ? 'इशारे' : 'Alerts')}</span>
+        </button>
+        <button
           onClick={() => setIsPhoneFrame(!isPhoneFrame)}
           style={{
             display: 'flex',
@@ -217,7 +244,7 @@ export default function App() {
         <Header
           title={headerInfo.title}
           subtitle={headerInfo.subtitle}
-          showBack={currentScreen === 'register' || currentScreen === 'farm_setup' || activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' || activeTab === 'insights'}
+          showBack={currentScreen === 'register' || currentScreen === 'farm_setup' || activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' || activeTab === 'insights' || activeTab === 'alerts'}
           onBack={() => {
             if (currentScreen === 'register') setCurrentScreen('welcome');
             else if (currentScreen === 'farm_setup') setCurrentScreen('register');
@@ -225,6 +252,7 @@ export default function App() {
             else if (activeTab === 'zone_details') setActiveTab('farm_map');
             else if (activeTab === 'farm_map') setActiveTab('dashboard');
             else if (activeTab === 'insights') setActiveTab('dashboard');
+            else if (activeTab === 'alerts') setActiveTab('dashboard');
           }}
           currentLang={currentLang}
           onToggleLang={cycleLanguage}
@@ -355,6 +383,19 @@ export default function App() {
                   farmId={selectedFarmId}
                   currentLang={currentLang}
                   onBack={() => setActiveTab('dashboard')}
+                />
+              )}
+
+              {activeTab === 'alerts' && (
+                <AlertsHistoryPage
+                  farmId={selectedFarmId}
+                  currentLang={currentLang}
+                  onBack={() => setActiveTab('dashboard')}
+                  onSelectRecommendation={(recId) => {
+                    setSelectedRecId(recId);
+                    setOriginatingTab('alerts');
+                    setActiveTab('recommendation_details');
+                  }}
                 />
               )}
             </>
