@@ -53,6 +53,8 @@ export default function AlertsHistoryPage({
     error,
     sourceErrors,
     isPartialData,
+    alertsFetchSuccess,
+    historyFetchSuccess,
     refresh,
     markAlertViewed,
     isAlertViewed,
@@ -309,45 +311,6 @@ export default function AlertsHistoryPage({
         </div>
       )}
 
-      {/* Primary Error State */}
-      {error && alerts.length === 0 && history.length === 0 && (
-        <div
-          role="alert"
-          style={{
-            background: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid rgba(239, 68, 68, 0.45)',
-            borderRadius: '16px',
-            padding: '24px 16px',
-            textAlign: 'center',
-            margin: '20px 0',
-          }}
-        >
-          <AlertTriangle size={36} color="#EF4444" style={{ margin: '0 auto 10px auto' }} />
-          <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#FFFFFF', margin: '0 0 6px 0' }}>
-            {isMarathi ? 'माहिती लोड करण्यात त्रुटी' : 'Error loading alerts & history'}
-          </h4>
-          <p style={{ fontSize: '12.5px', color: '#FCA5A5', margin: '0 0 16px 0' }}>
-            {error}
-          </p>
-          <button
-            type="button"
-            onClick={refresh}
-            style={{
-              padding: '8px 18px',
-              borderRadius: '20px',
-              background: '#EF4444',
-              color: '#FFFFFF',
-              border: 'none',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            {isMarathi ? 'पुन्हा प्रयत्न करा' : 'Try Again'}
-          </button>
-        </div>
-      )}
-
       {/* Loading Skeletons */}
       {isLoading && alerts.length === 0 && history.length === 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '20px 0' }}>
@@ -380,7 +343,7 @@ export default function AlertsHistoryPage({
             currentLang={currentLang}
           />
 
-          {/* Alert Cards Feed */}
+          {/* Alert Cards Feed, Error State, or Empty State */}
           {filteredAlerts.length > 0 ? (
             <div>
               {filteredAlerts.map((alert) => (
@@ -393,6 +356,43 @@ export default function AlertsHistoryPage({
                   currentLang={currentLang}
                 />
               ))}
+            </div>
+          ) : (sourceErrors?.alerts || (error && !alertsFetchSuccess)) ? (
+            <div
+              role="alert"
+              style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.45)',
+                borderRadius: '16px',
+                padding: '24px 16px',
+                textAlign: 'center',
+                margin: '16px 0',
+              }}
+            >
+              <AlertTriangle size={36} color="#EF4444" style={{ margin: '0 auto 10px auto' }} />
+              <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#FFFFFF', margin: '0 0 6px 0' }}>
+                {isMarathi ? 'इशारे लोड करण्यात त्रुटी' : isHindi ? 'अलर्ट लोड करने में त्रुटि' : 'Error loading alerts'}
+              </h4>
+              <p style={{ fontSize: '12.5px', color: '#FCA5A5', margin: '0 0 16px 0' }}>
+                {sourceErrors?.alerts || error}
+              </p>
+              <button
+                type="button"
+                onClick={refresh}
+                style={{
+                  padding: '8px 18px',
+                  minHeight: '44px',
+                  borderRadius: '20px',
+                  background: '#EF4444',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                {isMarathi ? 'पुन्हा प्रयत्न करा' : isHindi ? 'पुनः प्रयास करें' : 'Try Again'}
+              </button>
             </div>
           ) : (
             <AlertsEmptyState
@@ -416,6 +416,43 @@ export default function AlertsHistoryPage({
               sourceErrors={sourceErrors}
               onSelectRecommendation={onSelectRecommendation}
             />
+          ) : (sourceErrors?.history || (error && !historyFetchSuccess)) ? (
+            <div
+              role="alert"
+              style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.45)',
+                borderRadius: '16px',
+                padding: '24px 16px',
+                textAlign: 'center',
+                margin: '16px 0',
+              }}
+            >
+              <AlertTriangle size={36} color="#EF4444" style={{ margin: '0 auto 10px auto' }} />
+              <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#FFFFFF', margin: '0 0 6px 0' }}>
+                {isMarathi ? 'इतिहास लोड करण्यात त्रुटी' : isHindi ? 'इतिहास लोड करने में त्रुटि' : 'Error loading activity history'}
+              </h4>
+              <p style={{ fontSize: '12.5px', color: '#FCA5A5', margin: '0 0 16px 0' }}>
+                {sourceErrors?.history || error}
+              </p>
+              <button
+                type="button"
+                onClick={refresh}
+                style={{
+                  padding: '8px 18px',
+                  minHeight: '44px',
+                  borderRadius: '20px',
+                  background: '#EF4444',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                {isMarathi ? 'पुन्हा प्रयत्न करा' : isHindi ? 'पुनः प्रयास करें' : 'Try Again'}
+              </button>
+            </div>
           ) : (
             <AlertsEmptyState
               type="history"

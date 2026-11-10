@@ -18,9 +18,83 @@ export class ApiClientError extends Error {
   }
 }
 
+/**
+ * Validates and resolves the backend API base URL based on runtime environment.
+ * 
+ * Safety & Deployment Rules:
+ * 1. Never silently use localhost as a production API URL.
+ * 2. In production Live Mode, requires a valid, explicitly configured VITE_API_BASE_URL.
+ * 3. In local development (!PROD), defaults safely to http://localhost:8000/api/v1.
+ * 4. Yields a descriptive configuration error when production Live Mode has no valid backend URL.
+ */
+export function resolveApiBaseUrl() {
+  const envUrl = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_API_BASE_URL : undefined;
+  const isProd = typeof import.meta !== 'undefined' && Boolean(import.meta.env?.PROD);
+
+  if (envUrl && typeof envUrl === 'string' && envUrl.trim().length > 0) {
+    const trimmed = envUrl.trim().replace(/\/+$/, '');
+
+    try {
+      if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        const parsed = new URL(trimmed);
+        const host = parsed.hostname.toLowerCase();
+        const isLocalhost =
+          host === 'localhost' ||
+          host === '127.0.0.1' ||
+          host === '0.0.0.0' ||
+          host.endsWith('.local');
+
+        if (isProd && isLocalhost) {
+          return {
+            url: null,
+            error: `Production Configuration Error: VITE_API_BASE_URL points to '${trimmed}'. In production Live Mode, the backend URL must point to a deployed, publicly accessible FastAPI backend. Localhost cannot be used in production.`,
+          };
+        }
+        return { url: trimmed, error: null };
+      } else if (trimmed.startsWith('/')) {
+        // Reverse-proxy relative URL support (e.g., /api/v1)
+        return { url: trimmed, error: null };
+      } else {
+        return {
+          url: null,
+          error: `Configuration Error: VITE_API_BASE_URL must be an absolute URL (https://...) or root-relative path (/api/v1). Got: '${trimmed}'.`,
+        };
+      }
+    } catch (parseErr) {
+      return {
+        url: null,
+        error: `Configuration Error: Invalid VITE_API_BASE_URL '${trimmed}': ${parseErr.message}`,
+      };
+    }
+  }
+
+  // If VITE_API_BASE_URL is not configured
+  if (isProd) {
+    return {
+      url: null,
+      error: 'Production Configuration Error: VITE_API_BASE_URL is not configured. In production Live Mode, set VITE_API_BASE_URL in Vercel Project Settings to your deployed FastAPI backend (e.g., https://<backend-host>/api/v1). The application will not silently fall back to localhost in production.',
+    };
+  }
+
+  // Safe fallback for local development only
+  return {
+    url: 'http://localhost:8000/api/v1',
+    error: null,
+  };
+}
+
 class ApiClient {
   constructor() {
-    this.baseUrl = (import.meta.env?.VITE_API_BASE_URL || 'http://localhost:8000/api/v1').replace(/\/+$/, '');
+    this._resolvedBase = resolveApiBaseUrl();
+    this.baseUrl = this._resolvedBase.url;
+  }
+
+  getBaseUrl() {
+    const resolved = resolveApiBaseUrl();
+    if (resolved.error) {
+      throw new ApiClientError(resolved.error, 0, null, 'CONFIG_ERROR');
+    }
+    return resolved.url;
   }
 
   /**
@@ -63,8 +137,9 @@ class ApiClient {
       ...customOptions
     } = options;
 
+    const activeBaseUrl = this.getBaseUrl();
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    const url = `${this.baseUrl}${cleanEndpoint}`;
+    const url = `${activeBaseUrl}${cleanEndpoint}`;
 
     const requestHeaders = {
       'Content-Type': 'application/json',

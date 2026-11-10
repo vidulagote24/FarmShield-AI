@@ -8,12 +8,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { farmsApi, zonesApi } from '../../../lib/api/index.js';
 import { DEMO_FARM_FIXTURE, DEMO_ZONES_FIXTURE } from '../../../data/fixtures/demoFarm.js';
+import { useDataMode } from '../../../lib/dataMode.js';
 
 export function useFarmMap(initialFarmId = null) {
-  // Determine initial mode from environment or localStorage
-  const [dataMode, setDataMode] = useState(() => {
-    return localStorage.getItem('farmshield_data_mode') || import.meta.env?.VITE_DATA_MODE || 'demo';
-  });
+  // Synchronized global data mode across all screens
+  const { dataMode, isDemoMode, toggleDataMode, setDataMode } = useDataMode();
 
   const [farm, setFarm] = useState(null);
   const [zones, setZones] = useState([]);
@@ -22,8 +21,6 @@ export function useFarmMap(initialFarmId = null) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [resetViewTrigger, setResetViewTrigger] = useState(0);
-
-  const isDemoMode = dataMode === 'demo';
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -112,17 +109,6 @@ export function useFarmMap(initialFarmId = null) {
   const resetMap = useCallback(() => {
     setResetViewTrigger((c) => c + 1);
   }, []);
-
-  // Switch data mode
-  const toggleDataMode = useCallback(() => {
-    const nextMode = dataMode === 'demo' ? 'live' : 'demo';
-    setDataMode(nextMode);
-    try {
-      localStorage.setItem('farmshield_data_mode', nextMode);
-    } catch {
-      // localStorage disabled
-    }
-  }, [dataMode]);
 
   return {
     farm,

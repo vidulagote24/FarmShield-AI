@@ -20,11 +20,14 @@ import {
   DEMO_OBSERVATIONS_FIXTURE,
   DEMO_RECOMMENDATIONS_FIXTURE,
 } from '../../../data/fixtures/demoFarm.js';
+import { useDataMode } from '../../../lib/dataMode.js';
 
 // In-memory session store for demo mode status updates
 const demoStatusOverrides = new Map();
 
 export function useRecommendationDetails(recommendationId, initialFarmId = null, initialZoneId = null) {
+  const { isDemoMode, dataMode, toggleDataMode, setDataMode } = useDataMode();
+
   const [recommendation, setRecommendation] = useState(null);
   const [zone, setZone] = useState(null);
   const [farm, setFarm] = useState(null);
@@ -34,11 +37,6 @@ export function useRecommendationDetails(recommendationId, initialFarmId = null,
 
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [statusUpdateError, setStatusUpdateError] = useState(null);
-
-  // Initialize data mode from environment
-  const [isDemoMode, setIsDemoMode] = useState(() => {
-    return import.meta.env.VITE_DATA_MODE === 'demo';
-  });
 
   const fetchData = useCallback(async () => {
     if (!recommendationId) {
@@ -203,7 +201,9 @@ export function useRecommendationDetails(recommendationId, initialFarmId = null,
     isUpdatingStatus,
     statusUpdateError,
     isDemoMode,
-    setIsDemoMode,
+    dataMode,
+    toggleDataMode,
+    setIsDemoMode: setDataMode,
     updateStatus,
     refetch: fetchData,
   };

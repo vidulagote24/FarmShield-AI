@@ -18,6 +18,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { alertsApi } from '../../../lib/api/alerts.js';
 import { historyApi } from '../../../lib/api/history.js';
 import { farmsApi } from '../../../lib/api/farms.js';
+import { useDataMode } from '../../../lib/dataMode.js';
 
 // Safe localStorage helper with in-memory fallback for private browsing or quota errors
 function getStorageKey(farmId) {
@@ -47,6 +48,8 @@ function saveViewedAlertsToStorage(farmId, viewedSet) {
 }
 
 export function useAlertsAndHistory(targetFarmId = null, initialTab = 'alerts') {
+  const { isDemoMode, dataMode, toggleDataMode, setDataMode } = useDataMode();
+
   const [activeTab, setActiveTab] = useState(initialTab); // 'alerts' | 'history'
   const [priorityFilter, setPriorityFilter] = useState('all'); // 'all' | 'critical' | 'high' | 'agronomic'
   
@@ -57,11 +60,8 @@ export function useAlertsAndHistory(targetFarmId = null, initialTab = 'alerts') 
   const [error, setError] = useState(null);
   const [sourceErrors, setSourceErrors] = useState({});
   const [isPartialData, setIsPartialData] = useState(false);
-
-  // Mode state initialized from environment
-  const [isDemoMode, setIsDemoMode] = useState(() => {
-    return import.meta.env.VITE_DATA_MODE === 'demo';
-  });
+  const [alertsFetchSuccess, setAlertsFetchSuccess] = useState(false);
+  const [historyFetchSuccess, setHistoryFetchSuccess] = useState(false);
 
   // Farm-scoped local viewed alerts set
   const [viewedAlertIds, setViewedAlertIds] = useState(() => {
@@ -123,10 +123,13 @@ export function useAlertsAndHistory(targetFarmId = null, initialTab = 'alerts') 
       let historyData = [];
       const aggregatedErrors = {};
       let isPartial = false;
+      let alertsOk = false;
+      let historyOk = false;
 
       // Handle Alerts Result
       if (alertsRes.status === 'fulfilled') {
         alertsData = alertsRes.value?.items || [];
+        alertsOk = true;
       } else {
         if (!controller.signal.aborted) {
           aggregatedErrors.alerts = alertsRes.reason?.message || 'Failed to fetch recommendation alerts.';
@@ -141,6 +144,7 @@ export function useAlertsAndHistory(targetFarmId = null, initialTab = 'alerts') 
         if (histVal?.sourceErrors) {
           Object.assign(aggregatedErrors, histVal.sourceErrors);
         }
+        historyOk = true;
       } else {
         if (!controller.signal.aborted) {
           aggregatedErrors.history = historyRes.reason?.message || 'Failed to aggregate activity history.';
@@ -157,6 +161,8 @@ export function useAlertsAndHistory(targetFarmId = null, initialTab = 'alerts') 
       setHistory(historyData);
       setSourceErrors(aggregatedErrors);
       setIsPartialData(isPartial || Object.keys(aggregatedErrors).length > 0);
+      setAlertsFetchSuccess(alertsOk);
+      setHistoryFetchSuccess(historyOk);
       setIsLoading(false);
     } catch (err) {
       if (controller.signal.aborted || err.name === 'AbortError' || err.message?.includes('aborted')) {
@@ -164,6 +170,8 @@ export function useAlertsAndHistory(targetFarmId = null, initialTab = 'alerts') 
       }
       if (seq === currentReqSeq.current) {
         setError(err.message || 'Error loading alerts and history data.');
+        setAlertsFetchSuccess(false);
+        setHistoryFetchSuccess(false);
         setIsLoading(false);
       }
     }
@@ -228,11 +236,15 @@ export function useAlertsAndHistory(targetFarmId = null, initialTab = 'alerts') 
     error,
     sourceErrors,
     isPartialData,
+    alertsFetchSuccess,
+    historyFetchSuccess,
     refresh: fetchData,
     markAlertViewed,
     isAlertViewed,
     isDemoMode,
-    setIsDemoMode,
+    dataMode,
+    toggleDataMode,
+    setIsDemoMode: setDataMode,
   };
 }
 

@@ -19,7 +19,11 @@ import {
   DEMO_RECOMMENDATIONS_FIXTURE 
 } from '../../../data/fixtures/demoFarm.js';
 
+import { useDataMode } from '../../../lib/dataMode.js';
+
 export function useZoneDetails(zoneId, parentFarmId = null) {
+  const { isDemoMode, dataMode, toggleDataMode } = useDataMode();
+
   const [zone, setZone] = useState(null);
   const [farm, setFarm] = useState(null);
   const [observations, setObservations] = useState([]);
@@ -27,11 +31,6 @@ export function useZoneDetails(zoneId, parentFarmId = null) {
   const [stressAssessment, setStressAssessment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Initialize data mode from environment
-  const [isDemoMode, setIsDemoMode] = useState(() => {
-    return import.meta.env.VITE_DATA_MODE === 'demo';
-  });
 
   const fetchData = useCallback(async () => {
     if (!zoneId) {
@@ -192,10 +191,6 @@ export function useZoneDetails(zoneId, parentFarmId = null) {
     fetchData();
   }, [fetchData]);
 
-  const toggleDataMode = () => {
-    setIsDemoMode((prev) => !prev);
-  };
-
   return {
     zone,
     farm,
@@ -205,6 +200,7 @@ export function useZoneDetails(zoneId, parentFarmId = null) {
     loading,
     error,
     isDemoMode,
+    dataMode,
     toggleDataMode,
     refetch: fetchData,
   };

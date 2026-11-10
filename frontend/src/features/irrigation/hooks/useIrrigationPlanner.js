@@ -18,8 +18,11 @@ import {
   DEMO_RECOMMENDATIONS_FIXTURE, 
   DEMO_IRRIGATION_EVENTS_FIXTURE 
 } from '../../../data/fixtures/demoFarm.js';
+import { useDataMode } from '../../../lib/dataMode.js';
 
 export function useIrrigationPlanner(initialFarmId = null, initialZoneId = null) {
+  const { isDemoMode, dataMode, toggleDataMode } = useDataMode();
+
   const [farm, setFarm] = useState(null);
   const [zones, setZones] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
@@ -32,11 +35,6 @@ export function useIrrigationPlanner(initialFarmId = null, initialZoneId = null)
   const [submitting, setSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState(null);
   const [lastSavedEvent, setLastSavedEvent] = useState(null);
-
-  // Initialize data provider mode from environment
-  const [isDemoMode, setIsDemoMode] = useState(() => {
-    return import.meta.env.VITE_DATA_MODE === 'demo';
-  });
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -217,10 +215,6 @@ export function useIrrigationPlanner(initialFarmId = null, initialZoneId = null)
     }
   };
 
-  const toggleDataMode = () => {
-    setIsDemoMode((prev) => !prev);
-  };
-
   const clearSubmissionStatus = () => {
     setLastSavedEvent(null);
     setSubmissionError(null);
@@ -252,6 +246,7 @@ export function useIrrigationPlanner(initialFarmId = null, initialZoneId = null)
     recordIrrigation,
     clearSubmissionStatus,
     isDemoMode,
+    dataMode,
     toggleDataMode,
     refetch: fetchData,
   };

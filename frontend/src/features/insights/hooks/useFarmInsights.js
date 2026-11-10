@@ -28,8 +28,11 @@ import {
   DEMO_ZONES_FIXTURE,
   DEMO_OBSERVATIONS_FIXTURE,
 } from '../../../data/fixtures/demoFarm.js';
+import { useDataMode } from '../../../lib/dataMode.js';
 
 export function useFarmInsights(targetFarmId = null, initialDateRange = '30d') {
+  const { isDemoMode, dataMode, toggleDataMode, setDataMode } = useDataMode();
+
   const [farm, setFarm] = useState(null);
   const [zones, setZones] = useState([]);
   const [allObservations, setAllObservations] = useState([]);
@@ -45,11 +48,6 @@ export function useFarmInsights(targetFarmId = null, initialDateRange = '30d') {
   // Filter states
   const [dateRange, setDateRange] = useState(initialDateRange); // '7d' | '30d' | '90d' | 'all'
   const [selectedZoneFilter, setSelectedZoneFilter] = useState('all'); // 'all' | zone_id
-
-  // Mode state initialized from environment
-  const [isDemoMode, setIsDemoMode] = useState(() => {
-    return import.meta.env.VITE_DATA_MODE === 'demo';
-  });
 
   // Request race-condition sequence & abort controller refs
   const currentReqSeq = useRef(0);
@@ -261,7 +259,9 @@ export function useFarmInsights(targetFarmId = null, initialDateRange = '30d') {
     selectedZoneFilter,
     setSelectedZoneFilter,
     isDemoMode,
-    setIsDemoMode,
+    dataMode,
+    toggleDataMode,
+    setIsDemoMode: setDataMode,
     // Task 10.1 fields
     isPartialData,
     partialDataNotice,
