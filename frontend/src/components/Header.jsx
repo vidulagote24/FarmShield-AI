@@ -1,173 +1,279 @@
-import React from 'react';
-import { Globe, Bell, ChevronLeft, Shield } from 'lucide-react';
+import React, { useRef } from 'react';
+import {
+  Globe,
+  Bell,
+  ChevronLeft,
+  Shield,
+  Home,
+  Map as MapIcon,
+  Droplets,
+  TrendingUp,
+  Sprout,
+  User,
+  Smartphone,
+  Monitor,
+  MapPin
+} from 'lucide-react';
 
-export default function Header({ 
-  title, 
-  subtitle, 
-  showBack, 
-  onBack, 
-  currentLang, 
-  onToggleLang, 
-  farmerName,
-  isDarkTheme = true
+export default function Header({
+  title,
+  subtitle,
+  showBack,
+  onBack,
+  currentLang = 'mr',
+  onToggleLang,
+  farmerName = 'आनंदराव शिंदे',
+  farmerVillage = 'बारामती, पुणे',
+  activeTab = 'dashboard',
+  onSelectTab,
+  onToggleAlerts,
+  isPhoneFrame = false,
+  onTogglePhoneFrame,
+  isDarkTheme = true,
+  currentScreen = 'main'
 }) {
+  const headerRef = useRef(null);
+
   const langLabels = {
     mr: 'मराठी',
     hi: 'हिंदी',
     en: 'EN'
   };
 
+  // Primary navigation destinations - exact existing routes & labels preserved
+  const navItems = [
+    {
+      id: 'dashboard',
+      label: currentLang === 'mr' ? 'डॅशबोर्ड' : currentLang === 'hi' ? 'डैशबोर्ड' : 'Dashboard',
+      icon: Home,
+      match: ['dashboard'],
+    },
+    {
+      id: 'farm_map',
+      label: currentLang === 'mr' ? 'शेताचा नकाशा' : currentLang === 'hi' ? 'खेत नक्शा' : 'Farm Map',
+      icon: MapIcon,
+      match: ['farm_map', 'zone_details'],
+    },
+    {
+      id: 'irrigation',
+      label: currentLang === 'mr' ? 'पाणी नियोजन' : currentLang === 'hi' ? 'सिंचाई' : 'Irrigation',
+      icon: Droplets,
+      match: ['irrigation'],
+    },
+    {
+      id: 'insights',
+      label: currentLang === 'mr' ? 'कल विश्लेषण' : currentLang === 'hi' ? 'विश्लेषण' : 'Insights',
+      icon: TrendingUp,
+      match: ['insights'],
+    },
+    {
+      id: 'alerts',
+      label: currentLang === 'mr' ? 'इशारे' : currentLang === 'hi' ? 'इशारे' : 'Alerts',
+      icon: Bell,
+      match: ['alerts'],
+      hasDot: true,
+    },
+    {
+      id: 'crops',
+      label: currentLang === 'mr' ? 'पीक रक्षण' : currentLang === 'hi' ? 'फसल सुरक्षा' : 'Crops',
+      icon: Sprout,
+      match: ['crops'],
+    },
+  ];
+
+  const handleNavClick = (tabId) => {
+    if (tabId === 'alerts' && onToggleAlerts) {
+      onToggleAlerts();
+    } else if (onSelectTab) {
+      onSelectTab(tabId);
+    }
+  };
+
+  const isItemActive = (item) => {
+    return item.match.includes(activeTab);
+  };
+
+  const isMainApp = currentScreen === 'main';
+
   return (
-    <header style={{
-      padding: '14px 18px 12px',
-      background: 'rgba(7, 31, 22, 0.75)',
-      backdropFilter: 'blur(20px) saturate(140%)',
-      WebkitBackdropFilter: 'blur(20px) saturate(140%)',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      position: 'sticky',
-      top: 0,
-      zIndex: 30,
-      transition: 'all 0.3s ease'
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        {showBack ? (
-          <button 
-            onClick={onBack}
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.18)',
-              background: 'rgba(255, 255, 255, 0.10)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: '#FFFFFF',
-              transition: 'all 0.2s ease'
-            }}
-            aria-label="Back"
+    <header
+      ref={headerRef}
+      className="main-navbar"
+      role="banner"
+    >
+      <div className="navbar-container">
+
+        {/* ============================================================== */}
+        {/* 1. LEFT: Brand Identity & Subpage Back Navigation              */}
+        {/* ============================================================== */}
+        <div className="navbar-brand-section">
+          {showBack ? (
+            <button
+              onClick={onBack}
+              className="navbar-back-btn"
+              aria-label={currentLang === 'mr' ? 'मागे जा' : currentLang === 'hi' ? 'पीछे जाएं' : 'Go back'}
+            >
+              <ChevronLeft size={20} />
+              <span className="navbar-back-label">
+                {currentLang === 'mr' ? 'मागे' : currentLang === 'hi' ? 'वापस' : 'Back'}
+              </span>
+            </button>
+          ) : (
+            <div
+              className="navbar-logo-btn"
+              onClick={() => onSelectTab && onSelectTab('dashboard')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' && onSelectTab) onSelectTab('dashboard'); }}
+              aria-label="FarmShield AI Home"
+            >
+              <div className="navbar-shield-icon">
+                <Shield size={20} />
+              </div>
+              <div className="navbar-title-group">
+                <div className="navbar-brand-row">
+                  <span className="navbar-brand-name">FarmShield AI</span>
+                  <span className="navbar-pro-badge">PRO</span>
+                </div>
+                {subtitle && (
+                  <span className="navbar-subtitle-text">{subtitle}</span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ============================================================== */}
+        {/* 2. CENTER: Polished Horizontal Nav (>= 768px Desktop/Tablet)    */}
+        {/* ============================================================== */}
+        {isMainApp && (
+          <nav
+            className="navbar-desktop-nav"
+            role="navigation"
+            aria-label="Desktop Navigation"
           >
-            <ChevronLeft size={20} />
-          </button>
-        ) : (
-          <div style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, rgba(101, 199, 106, 0.25) 0%, rgba(11, 45, 32, 0.8) 100%)',
-            border: '1px solid rgba(197, 243, 107, 0.45)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#C5F36B',
-            boxShadow: '0 0 14px rgba(197, 243, 107, 0.25)'
-          }}>
-            <Shield size={20} />
-          </div>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const active = isItemActive(item);
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id)}
+                  className={`navbar-nav-item ${active ? 'active' : ''}`}
+                  aria-current={active ? 'page' : undefined}
+                  title={item.label}
+                >
+                  <Icon size={16} strokeWidth={active ? 2.4 : 1.9} />
+                  <span>{item.label}</span>
+                  {item.hasDot && !active && (
+                    <span className="navbar-unread-dot" aria-hidden="true" />
+                  )}
+                  {active && <span className="navbar-active-bar" aria-hidden="true" />}
+                </button>
+              );
+            })}
+          </nav>
         )}
 
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <h1 style={{
-              fontSize: '16px',
-              fontWeight: 800,
-              color: '#FFFFFF',
-              letterSpacing: '-0.3px',
-              lineHeight: 1.2
-            }}>
-              {title || 'FarmShield AI'}
-            </h1>
-            <span style={{
-              fontSize: '9.5px',
-              fontWeight: 800,
-              color: '#C5F36B',
-              background: 'rgba(197, 243, 107, 0.15)',
-              border: '1px solid rgba(197, 243, 107, 0.35)',
-              padding: '1px 6px',
-              borderRadius: '8px',
-              letterSpacing: '0.4px'
-            }}>
-              PRO
-            </span>
-          </div>
-          {subtitle && (
-            <p style={{
-              fontSize: '11.5px',
-              color: '#D5E3D9',
-              fontWeight: 500,
-              marginTop: '1px'
-            }}>
-              {subtitle}
-            </p>
+        {/* ============================================================== */}
+        {/* 3. RIGHT: Actions (Language, Notifications, Profile, Toggle)  */}
+        {/* ============================================================== */}
+        <div className="navbar-actions-section">
+          {/* Farmer Location Chip (Desktop >= 1024px) */}
+          {isMainApp && farmerVillage && (
+            <div className="navbar-farmer-chip" title={`${farmerName} (${farmerVillage})`}>
+              <MapPin size={13} color="#C5F36B" />
+              <span className="farmer-chip-text">{farmerVillage.split(',')[0]}</span>
+            </div>
+          )}
+
+          {/* Bilingual Language Switcher */}
+          <button
+            onClick={onToggleLang}
+            className="navbar-action-btn navbar-lang-btn"
+            title={currentLang === 'mr' ? 'भाषा बदला (Change Language)' : 'Change Language'}
+            aria-label={`Current language: ${langLabels[currentLang]}. Click to switch.`}
+          >
+            <Globe size={14} />
+            <span className="lang-code-text">{langLabels[currentLang] || 'EN'}</span>
+          </button>
+
+          {/* Notifications Bell Button */}
+          {isMainApp && (
+            <button
+              onClick={() => handleNavClick('alerts')}
+              className={`navbar-action-btn navbar-icon-btn ${activeTab === 'alerts' ? 'active-icon' : ''}`}
+              title={currentLang === 'mr' ? 'इशारे व सूचना' : 'Alerts and Notifications'}
+              aria-label="Alerts and Notifications"
+            >
+              <Bell size={17} />
+              <span className="navbar-pulse-badge" aria-hidden="true" />
+            </button>
+          )}
+
+          {/* Farmer Profile Button */}
+          {isMainApp && (
+            <button
+              onClick={() => onSelectTab && onSelectTab('profile')}
+              className={`navbar-action-btn navbar-profile-btn ${activeTab === 'profile' ? 'active-icon' : ''}`}
+              title={currentLang === 'mr' ? 'शेतकरी खाते' : 'Farmer Profile'}
+              aria-label="Farmer Profile"
+            >
+              <User size={17} />
+            </button>
+          )}
+
+          {/* Device Shell Simulator Toggle (Desktop >= 1024px) */}
+          {isMainApp && onTogglePhoneFrame && (
+            <button
+              onClick={onTogglePhoneFrame}
+              className="navbar-action-btn navbar-frame-toggle-btn"
+              title={isPhoneFrame ? 'Switch to Full Width Responsive View' : 'Switch to Phone Shell Simulator View'}
+              aria-label="Toggle frame layout"
+            >
+              {isPhoneFrame ? <Monitor size={15} color="#C5F36B" /> : <Smartphone size={15} color="#C5F36B" />}
+              <span className="frame-toggle-label">{isPhoneFrame ? 'Full Width' : 'Phone Shell'}</span>
+            </button>
           )}
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {/* Quick Language Toggle Button */}
-        <button
-          onClick={onToggleLang}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            padding: '6px 12px',
-            borderRadius: '20px',
-            border: '1px solid rgba(197, 243, 107, 0.35)',
-            background: 'rgba(10, 43, 28, 0.65)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            color: '#C5F36B',
-            fontSize: '12px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.15s ease'
-          }}
-          title="Change Language"
+      {/* ============================================================== */}
+      {/* 4. MOBILE: Visible Multi-Row Navigation Grid (< 768px)         */}
+      {/*    All 6 primary destinations visible simultaneously in 2 cols */}
+      {/*    No horizontal scrolling, no clipping, no hidden menus       */}
+      {/* ============================================================== */}
+      {isMainApp && (
+        <nav
+          className="navbar-mobile-nav"
+          role="navigation"
+          aria-label="Mobile Primary Navigation"
         >
-          <Globe size={13} />
-          <span>{langLabels[currentLang] || 'EN'}</span>
-        </button>
-
-        {/* Notifications */}
-        <button
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            border: '1px solid rgba(255, 255, 255, 0.18)',
-            background: 'rgba(255, 255, 255, 0.10)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#D5E3D9',
-            cursor: 'pointer',
-            position: 'relative'
-          }}
-          aria-label="Notifications"
-        >
-          <Bell size={16} />
-          <span style={{
-            position: 'absolute',
-            top: '7px',
-            right: '7px',
-            width: '6px',
-            height: '6px',
-            backgroundColor: '#C5F36B',
-            borderRadius: '50%',
-            boxShadow: '0 0 8px #C5F36B'
-          }} />
-        </button>
-      </div>
+          <div className="navbar-mobile-grid">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const active = isItemActive(item);
+              return (
+                <button
+                  key={`mob-${item.id}`}
+                  onClick={() => handleNavClick(item.id)}
+                  className={`navbar-mobile-item ${active ? 'active' : ''}`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  <div className="mobile-item-icon-wrap">
+                    <Icon size={16} strokeWidth={active ? 2.5 : 1.9} />
+                    {item.hasDot && !active && (
+                      <span className="navbar-unread-dot mobile-unread-dot" aria-hidden="true" />
+                    )}
+                  </div>
+                  <span className="mobile-item-label">{item.label}</span>
+                  {active && <span className="mobile-active-indicator" aria-hidden="true" />}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+      )}
     </header>
   );
 }

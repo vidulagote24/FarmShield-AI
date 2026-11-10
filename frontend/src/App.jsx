@@ -27,7 +27,7 @@ export default function App() {
   const [currentLang, setCurrentLang] = useState('mr'); // default to Marathi
   const [currentScreen, setCurrentScreen] = useState(paramScreen || 'main'); // 'welcome' | 'register' | 'farm_setup' | 'main'
   const [activeTab, setActiveTab] = useState(paramTab || 'zone_details'); // 'dashboard' | 'irrigation' | 'crops' | 'profile' | 'farm_map' | 'zone_details' | 'recommendation_details'
-  
+
   // Active selected zone context for Zone Intelligence inspection
   const [selectedZoneId, setSelectedZoneId] = useState(paramZone || 'z3-south-west-003');
   const [selectedFarmId, setSelectedFarmId] = useState(null);
@@ -35,9 +35,9 @@ export default function App() {
   // Active recommendation context for Recommendation Details deep-dive
   const [selectedRecId, setSelectedRecId] = useState(paramRec || 'rec-c-03');
   const [originatingTab, setOriginatingTab] = useState('zone_details');
-  
+
   // Responsive frame toggle for desktop preview
-  const [isPhoneFrame, setIsPhoneFrame] = useState(true);
+  const [isPhoneFrame, setIsPhoneFrame] = useState(false);
 
   // Fictional farmer profile data for Hackathon demo privacy
   const [farmerData, setFarmerData] = useState({
@@ -95,9 +95,9 @@ export default function App() {
       return { title: t.nav.profile, subtitle: 'खाते व शेत तपशील' };
     }
     if (activeTab === 'farm_map') {
-      return { 
-        title: 'FarmShield AI', 
-        subtitle: currentLang === 'mr' ? 'शेताचा डिजिटल नकाशा (४ विभाग)' : 'Farm Digital Twin (4 Zones)' 
+      return {
+        title: 'FarmShield AI',
+        subtitle: currentLang === 'mr' ? 'शेताचा डिजिटल नकाशा (४ विभाग)' : 'Farm Digital Twin (4 Zones)'
       };
     }
     if (activeTab === 'zone_details') {
@@ -129,118 +129,35 @@ export default function App() {
 
   const headerInfo = getHeaderInfo();
 
+  // Navigation handlers
+  const handleToggleAlerts = () => setActiveTab(activeTab === 'alerts' ? 'dashboard' : 'alerts');
+
   return (
     <>
-      {/* Top Desktop Controls: Toggle between Phone Frame and Responsive View */}
-      <div className="top-desktop-controls">
-        <span style={{ fontSize: '12px', fontWeight: 800, color: '#C5F36B', display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <span>🌾</span> FarmShield AI Glassmorphic Preview
-        </span>
-        <button
-          onClick={() => setActiveTab(activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' ? 'dashboard' : 'farm_map')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            background: activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' ? 'rgba(197, 243, 107, 0.25)' : 'rgba(255, 255, 255, 0.12)',
-            backdropFilter: 'blur(10px)',
-            color: activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' ? '#C5F36B' : '#FFFFFF',
-            border: activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' ? '1px solid #C5F36B' : '1px solid rgba(255, 255, 255, 0.2)',
-            padding: '5px 12px',
-            borderRadius: '16px',
-            fontSize: '11.5px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <span>🗺️ {activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' ? (currentLang === 'mr' ? 'डॅशबोर्ड' : 'Dashboard') : (currentLang === 'mr' ? 'नकाशा' : 'Farm Map')}</span>
-        </button>
-        <button
-          onClick={() => setActiveTab(activeTab === 'insights' ? 'dashboard' : 'insights')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            background: activeTab === 'insights' ? 'rgba(56, 189, 248, 0.25)' : 'rgba(255, 255, 255, 0.12)',
-            backdropFilter: 'blur(10px)',
-            color: activeTab === 'insights' ? '#38BDF8' : '#FFFFFF',
-            border: activeTab === 'insights' ? '1px solid #38BDF8' : '1px solid rgba(255, 255, 255, 0.2)',
-            padding: '5px 12px',
-            borderRadius: '16px',
-            fontSize: '11.5px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <span>📈 {activeTab === 'insights' ? (currentLang === 'mr' ? 'डॅशबोर्ड' : 'Dashboard') : (currentLang === 'mr' ? 'कल विश्लेषण' : 'Insights')}</span>
-        </button>
-        <button
-          onClick={() => setActiveTab(activeTab === 'alerts' ? 'dashboard' : 'alerts')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            background: activeTab === 'alerts' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(255, 255, 255, 0.12)',
-            backdropFilter: 'blur(10px)',
-            color: activeTab === 'alerts' ? '#FCA5A5' : '#FFFFFF',
-            border: activeTab === 'alerts' ? '1px solid #EF4444' : '1px solid rgba(255, 255, 255, 0.2)',
-            padding: '5px 12px',
-            borderRadius: '16px',
-            fontSize: '11.5px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <span>🔔 {activeTab === 'alerts' ? (currentLang === 'mr' ? 'डॅशबोर्ड' : 'Dashboard') : (currentLang === 'mr' ? 'इशारे' : 'Alerts')}</span>
-        </button>
-        <button
-          onClick={() => setIsPhoneFrame(!isPhoneFrame)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: 'rgba(255, 255, 255, 0.12)',
-            backdropFilter: 'blur(10px)',
-            color: '#FFFFFF',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            padding: '5px 12px',
-            borderRadius: '16px',
-            fontSize: '11.5px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          {isPhoneFrame ? <Monitor size={14} color="#C5F36B" /> : <Smartphone size={14} color="#C5F36B" />}
-          <span>{isPhoneFrame ? 'Full Width' : 'Phone Shell'}</span>
-        </button>
-      </div>
-
-      <div 
-        className="app-viewport-wrapper" 
-        style={!isPhoneFrame ? { 
-          maxWidth: '100%', 
-          minHeight: '100vh', 
-          height: '100vh', 
-          borderRadius: 0, 
-          border: 'none', 
-          boxShadow: 'none' 
+      <div
+        className={`app-viewport-wrapper ${isPhoneFrame ? 'phone-frame-mode' : 'responsive-mode'}`}
+        style={!isPhoneFrame ? {
+          maxWidth: '100%',
+          minHeight: '100vh',
+          height: '100vh',
+          borderRadius: 0,
+          border: 'none',
+          boxShadow: 'none'
         } : {}}
       >
-        {/* Mobile Phone Top Status Bar Simulation */}
-        <div className="phone-status-bar">
-          <span>9:41</span>
-          <div className="status-bar-notch" />
-          <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-            <span>5G</span>
-            <span>100%</span>
+        {/* Mobile Phone Top Status Bar Simulation (Only in Phone Shell Preview Mode) */}
+        {isPhoneFrame && (
+          <div className="phone-status-bar">
+            <span>9:41</span>
+            <div className="status-bar-notch" />
+            <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+              <span>5G</span>
+              <span>100%</span>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Global Glass App Header */}
+        {/* Global Responsive Glass App Navigation Bar */}
         <Header
           title={headerInfo.title}
           subtitle={headerInfo.subtitle}
@@ -257,7 +174,14 @@ export default function App() {
           currentLang={currentLang}
           onToggleLang={cycleLanguage}
           farmerName={farmerData.name}
+          farmerVillage={farmerData.village}
+          activeTab={activeTab}
+          onSelectTab={(tab) => setActiveTab(tab)}
+          onToggleAlerts={handleToggleAlerts}
+          isPhoneFrame={isPhoneFrame}
+          onTogglePhoneFrame={() => setIsPhoneFrame(!isPhoneFrame)}
           isDarkTheme={true}
+          currentScreen={currentScreen}
         />
 
         {/* Main Screen Content View */}
