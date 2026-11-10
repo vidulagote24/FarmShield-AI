@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
-from sqlalchemy import DateTime, Float, ForeignKey, Index, String, func
+from sqlalchemy import DateTime, Float, ForeignKey, Index, String, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
@@ -68,6 +68,15 @@ class Observation(Base):
     )
 
     __table_args__ = (
+        UniqueConstraint(
+            "farm_id",
+            "zone_id",
+            "observation_type",
+            "source",
+            "observed_at",
+            name="uq_observations_identity",
+            postgresql_nulls_not_distinct=True,
+        ),
         Index("ix_obs_farm_type_date", "farm_id", "observation_type", "observed_at"),
         Index("ix_obs_zone_date", "zone_id", "observed_at"),
     )
