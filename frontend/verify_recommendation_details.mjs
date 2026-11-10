@@ -114,6 +114,7 @@ function getAllowedTransitions(currentStatus) {
     case 'dismissed':
     case 'rejected':
     case 'expired':
+    case 'superseded':
       return []; // terminal states (can only reset in Demo Mode)
     default:
       return [];
@@ -125,6 +126,19 @@ assert(getAllowedTransitions('pending').includes('dismissed'), 'Pending status c
 assert(getAllowedTransitions('accepted').includes('applied'), 'Accepted status can transition to Applied');
 assert(getAllowedTransitions('accepted').includes('dismissed'), 'Accepted status can transition to Dismissed');
 assert(getAllowedTransitions('applied').length === 0, 'Applied is a terminal workflow state in Live Mode');
+assert(getAllowedTransitions('completed').length === 0, 'Completed is a terminal workflow state');
+assert(getAllowedTransitions('dismissed').length === 0, 'Dismissed is a terminal workflow state');
+assert(getAllowedTransitions('rejected').length === 0, 'Rejected is a terminal workflow state');
+assert(getAllowedTransitions('expired').length === 0, 'Expired is a terminal workflow state');
+assert(getAllowedTransitions('superseded').length === 0, 'Superseded is a terminal workflow state');
+
+const statusActionsSource = fs.readFileSync(path.join(__dirname, 'src/features/recommendations/components/RecommendationStatusActions.jsx'), 'utf8');
+assert(statusActionsSource.includes('isExpired'), 'RecommendationStatusActions explicitly handles expired status');
+assert(statusActionsSource.includes('isSuperseded'), 'RecommendationStatusActions explicitly handles superseded status');
+
+const statusTimelineSource = fs.readFileSync(path.join(__dirname, 'src/features/recommendations/components/RecommendationStatusTimeline.jsx'), 'utf8');
+assert(statusTimelineSource.includes('isExpired'), 'RecommendationStatusTimeline explicitly handles expired status');
+assert(statusTimelineSource.includes('isSuperseded'), 'RecommendationStatusTimeline explicitly handles superseded status');
 
 // -----------------------------------------------------------------------------
 // 6. Action Parameters & Hardware Decoupling

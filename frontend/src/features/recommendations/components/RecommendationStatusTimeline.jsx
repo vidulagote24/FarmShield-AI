@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CheckCircle2, Clock, Check, X, AlertOctagon, ArrowDown } from 'lucide-react';
+import { CheckCircle2, Clock, Check, X, AlertOctagon, AlertCircle, ArrowDown } from 'lucide-react';
 
 export default function RecommendationStatusTimeline({
   status = 'pending',
@@ -22,6 +22,7 @@ export default function RecommendationStatusTimeline({
   const isApplied = normStatus === 'applied' || normStatus === 'completed';
   const isDismissed = normStatus === 'dismissed' || normStatus === 'rejected';
   const isExpired = normStatus === 'expired';
+  const isSuperseded = normStatus === 'superseded';
 
   const formatTimestamp = (ts) => {
     if (!ts) return null;
@@ -82,6 +83,20 @@ export default function RecommendationStatusTimeline({
             }}
           >
             {isMarathi ? 'कालबाह्य (Expired)' : 'Expired'}
+          </span>
+        )}
+        {isSuperseded && (
+          <span
+            className="glass-pill"
+            style={{
+              color: '#C084FC',
+              border: '1px solid rgba(192, 132, 252, 0.4)',
+              background: 'rgba(192, 132, 252, 0.15)',
+              fontSize: '11px',
+              fontWeight: 800,
+            }}
+          >
+            {isMarathi ? 'अद्ययावत (Superseded)' : 'Superseded'}
           </span>
         )}
       </div>
@@ -149,7 +164,7 @@ export default function RecommendationStatusTimeline({
           </div>
         </div>
 
-        {/* Step 3: Terminal State (Applied OR Dismissed) */}
+        {/* Step 3: Terminal State (Applied OR Dismissed OR Expired OR Superseded) */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
           <div
             style={{
@@ -162,19 +177,21 @@ export default function RecommendationStatusTimeline({
                   ? '#94A3B8' 
                   : isExpired 
                     ? '#F87171' 
-                    : 'rgba(255, 255, 255, 0.12)',
-              color: (isApplied || isDismissed || isExpired) ? '#071F16' : '#94A3B8',
+                    : isSuperseded
+                      ? '#C084FC'
+                      : 'rgba(255, 255, 255, 0.12)',
+              color: (isApplied || isDismissed || isExpired || isSuperseded) ? '#071F16' : '#94A3B8',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 800,
               fontSize: '12px',
               flexShrink: 0,
-              border: (isApplied || isDismissed || isExpired) ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
+              border: (isApplied || isDismissed || isExpired || isSuperseded) ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: isApplied ? '0 0 10px rgba(74, 222, 128, 0.4)' : 'none',
             }}
           >
-            {isApplied ? <Check size={14} strokeWidth={3} /> : isDismissed ? <X size={14} strokeWidth={3} /> : isExpired ? <AlertOctagon size={14} strokeWidth={3} /> : '3'}
+            {isApplied ? <Check size={14} strokeWidth={3} /> : isDismissed ? <X size={14} strokeWidth={3} /> : isExpired ? <AlertOctagon size={14} strokeWidth={3} /> : isSuperseded ? <AlertCircle size={14} strokeWidth={3} /> : '3'}
           </div>
           <div>
             <div
@@ -187,7 +204,9 @@ export default function RecommendationStatusTimeline({
                     ? '#CBD5E1' 
                     : isExpired 
                       ? '#F87171' 
-                      : '#94A3B8',
+                      : isSuperseded
+                        ? '#C084FC'
+                        : '#94A3B8',
               }}
             >
               {isApplied 
@@ -196,14 +215,20 @@ export default function RecommendationStatusTimeline({
                   ? (isMarathi ? '३. सल्ला रद्द / नाकारला (Dismissed)' : '3. Advisory Dismissed / Rejected')
                   : isExpired
                     ? (isMarathi ? '३. मुदत संपली (Expired)' : '3. Expired without execution')
-                    : (isMarathi ? '३. अंमलबजावणी किंवा रद्द (Applied or Dismissed)' : '3. Pending Application on Field')}
+                    : isSuperseded
+                      ? (isMarathi ? '३. अधिक नवीन सल्ला उपलब्ध (Superseded)' : '3. Superseded by newer advisory')
+                      : (isMarathi ? '३. अंमलबजावणी किंवा रद्द (Applied or Dismissed)' : '3. Pending Application on Field')}
             </div>
             <div style={{ fontSize: '11px', color: '#8E9F90', marginTop: '1px' }}>
               {isApplied 
                 ? (isMarathi ? 'शेतकऱ्याने प्रत्यक्ष कृती पूर्ण झाल्याची नोंद केली.' : 'Confirmed applied on field by farmer.')
                 : isDismissed
                   ? (isMarathi ? 'शेतकऱ्याने हा सल्ला लागू न करण्याचा निर्णय घेतला.' : 'Farmer chose not to apply this recommendation.')
-                  : (isMarathi ? 'अंतिम टप्पा अद्याप प्रलंबित आहे.' : 'Final outcome not yet recorded.')}
+                  : isExpired
+                    ? (isMarathi ? 'या सल्ल्याची मुदत संपली आहे.' : 'Advisory reached expiration date.')
+                    : isSuperseded
+                      ? (isMarathi ? 'नवीन सल्ल्यामुळे हा सल्ला अद्ययावत झाला आहे.' : 'Replaced by newer recommendation.')
+                      : (isMarathi ? 'अंतिम टप्पा अद्याप प्रलंबित आहे.' : 'Final outcome not yet recorded.')}
             </div>
           </div>
         </div>

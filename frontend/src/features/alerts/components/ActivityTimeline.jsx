@@ -224,14 +224,34 @@ export default function ActivityTimeline({
                           borderRadius: '6px',
                           background: item.status === 'completed' || item.status === 'applied' || item.status === 'verified'
                             ? 'rgba(34, 197, 94, 0.15)'
-                            : item.status === 'unreadable'
-                              ? 'rgba(239, 68, 68, 0.15)'
-                              : 'rgba(255, 255, 255, 0.08)',
+                            : item.status === 'accepted'
+                              ? 'rgba(56, 189, 248, 0.15)'
+                              : item.status === 'pending'
+                                ? 'rgba(251, 191, 36, 0.15)'
+                                : item.status === 'dismissed' || item.status === 'rejected'
+                                  ? 'rgba(148, 163, 184, 0.15)'
+                                  : item.status === 'expired'
+                                    ? 'rgba(248, 113, 113, 0.15)'
+                                    : item.status === 'superseded'
+                                      ? 'rgba(192, 132, 252, 0.15)'
+                                      : item.status === 'unreadable'
+                                        ? 'rgba(239, 68, 68, 0.15)'
+                                        : 'rgba(255, 255, 255, 0.08)',
                           color: item.status === 'completed' || item.status === 'applied' || item.status === 'verified'
                             ? '#4ADE80'
-                            : item.status === 'unreadable'
-                              ? '#FCA5A5'
-                              : 'rgba(255, 255, 255, 0.7)',
+                            : item.status === 'accepted'
+                              ? '#38BDF8'
+                              : item.status === 'pending'
+                                ? '#FBBF24'
+                                : item.status === 'dismissed' || item.status === 'rejected'
+                                  ? '#94A3B8'
+                                  : item.status === 'expired'
+                                    ? '#F87171'
+                                    : item.status === 'superseded'
+                                      ? '#C084FC'
+                                      : item.status === 'unreadable'
+                                        ? '#FCA5A5'
+                                        : 'rgba(255, 255, 255, 0.7)',
                           border: '1px solid rgba(255, 255, 255, 0.1)',
                           textTransform: 'capitalize',
                         }}

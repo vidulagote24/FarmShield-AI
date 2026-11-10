@@ -6,11 +6,15 @@
  * This adapter derives the alert feed strictly from actual farm recommendations,
  * preserving recommendation IDs, provenance, and structured reasoning.
  * 
- * Strict Alert Eligibility Rules (Task 11.1.1):
- * 1. Status Eligibility:
- *    - Strictly limited to 'pending' (awaiting farmer action) and 'accepted' (acknowledged, action planned).
- *    - Recommendations with terminal or closed statuses ('applied', 'completed', 'dismissed', 'rejected', 'expired')
- *      are strictly EXCLUDED from active alerts. They are preserved in the activity history.
+ * Strict Alert Eligibility Rules (Task 11.1.1 & Task 12.1 Reconciliation):
+ * 1. Backend Status Contract Authority:
+ *    - Backend schema `VALID_STATUSES`: 'pending', 'accepted', 'applied', 'completed', 'dismissed', 'rejected', 'expired'.
+ *    - Default status is 'pending'.
+ *    - Active alert eligibility is strictly limited to 'pending' (awaiting farmer action) and 'accepted' (acknowledged, action planned).
+ *    - All backend terminal/closed statuses ('applied', 'completed', 'dismissed', 'rejected', 'expired') are strictly EXCLUDED.
+ *    - 'superseded' is non-active and strictly EXCLUDED (cannot appear as an active alert).
+ *    - 'deferred' is an agronomic explanation reason code in the intelligence engine, NOT a valid recommendation status.
+ *    - All historical records (regardless of status) are preserved in Activity History.
  * 2. Expiration Eligibility (valid_until):
  *    - If `valid_until` is present and valid ISO, expired recommendations are strictly EXCLUDED.
  *    - If `valid_until` is null, undefined, or invalid ISO, do NOT fabricate an expiration timestamp;
@@ -77,7 +81,8 @@ export const alertsApi = {
       // -------------------------------------------------------------
       // 1. Status Eligibility Check:
       // Only 'pending' or 'accepted' qualify as active alerts.
-      // 'applied', 'completed', 'dismissed', 'rejected', 'expired' are strictly excluded.
+      // Backend terminal/closed statuses ('applied', 'completed', 'dismissed', 'rejected', 'expired')
+      // as well as 'superseded' and 'deferred' are strictly excluded.
       // -------------------------------------------------------------
       const status = (rec.status || 'pending').toLowerCase();
       const isActiveStatus = status === 'pending' || status === 'accepted';

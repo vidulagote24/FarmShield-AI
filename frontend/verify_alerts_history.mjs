@@ -117,6 +117,22 @@ async function runTestSuite() {
       status: 'expired', // Closed - MUST BE EXCLUDED from active alerts
       generated_at: '2026-11-08T06:00:00Z',
     },
+    {
+      id: 'rec-status-superseded',
+      farm_id: 'farm-123',
+      title: 'Superseded Advisory (Non-Active)',
+      priority: 'high',
+      status: 'superseded', // Superseded - MUST BE EXCLUDED from active alerts
+      generated_at: '2026-11-08T06:00:00Z',
+    },
+    {
+      id: 'rec-status-deferred',
+      farm_id: 'farm-123',
+      title: 'Deferred Advisory (Reason Code / Non-Active)',
+      priority: 'high',
+      status: 'deferred', // Unsupported status - MUST BE EXCLUDED from active alerts
+      generated_at: '2026-11-08T06:00:00Z',
+    },
   ];
 
   recommendationsApi.listFarmRecommendations = async () => ({
@@ -126,7 +142,7 @@ async function runTestSuite() {
 
   const statusAlerts = await alertsApi.listFarmAlerts('farm-123', { referenceTime: testRefTime });
 
-  assert(statusAlerts.items.length === 2, 'Only 2 active alerts eligible: pending and accepted (5 terminal/closed statuses excluded)');
+  assert(statusAlerts.items.length === 2, 'Only 2 active alerts eligible: pending and accepted (terminal/closed/superseded/deferred statuses excluded)');
   assert(statusAlerts.items.some(a => a.id === 'rec-status-pending'), 'Pending recommendation is included as active alert');
   
   const acceptedAlert = statusAlerts.items.find(a => a.id === 'rec-status-accepted');
@@ -138,6 +154,8 @@ async function runTestSuite() {
   assert(!statusAlerts.items.some(a => a.id === 'rec-status-rejected'), 'Rejected recommendation is strictly EXCLUDED from active alerts');
   assert(!statusAlerts.items.some(a => a.id === 'rec-status-dismissed'), 'Dismissed recommendation is strictly EXCLUDED from active alerts');
   assert(!statusAlerts.items.some(a => a.id === 'rec-status-expired'), 'Expired recommendation is strictly EXCLUDED from active alerts');
+  assert(!statusAlerts.items.some(a => a.id === 'rec-status-superseded'), 'Superseded recommendation is strictly EXCLUDED from active alerts');
+  assert(!statusAlerts.items.some(a => a.id === 'rec-status-deferred'), 'Deferred recommendation is strictly EXCLUDED from active alerts');
 
   // -----------------------------------------------------------------------------
   // 2. Expiration Filtering with valid_until & Non-Fabrication Rules
@@ -372,6 +390,26 @@ async function runTestSuite() {
       status: 'applied', // Preserved in history even though excluded from active alerts!
       generated_at: '2026-11-06T08:00:00Z',
     },
+    {
+      id: 'rec-h-superseded',
+      farm_id: 'farm-123',
+      zone_id: 'zone-1',
+      title: 'मागील जुना सल्ला (Superseded Recommendation)',
+      description: 'अद्ययावत सल्ल्याने बदललेला',
+      priority: 'medium',
+      status: 'superseded', // Preserved in history!
+      generated_at: '2026-11-05T12:00:00Z',
+    },
+    {
+      id: 'rec-h-completed',
+      farm_id: 'farm-123',
+      zone_id: 'zone-1',
+      title: 'पूर्ण झालेला सल्ला (Completed Recommendation)',
+      description: 'सल्ला पूर्ण झाला',
+      priority: 'high',
+      status: 'completed', // Preserved in history!
+      generated_at: '2026-11-05T08:00:00Z',
+    },
   ];
 
   const mockObsForHist = [
@@ -398,12 +436,12 @@ async function runTestSuite() {
   ];
 
   irrigationApi.listFarmIrrigationEvents = async () => ({ items: mockIrrigations, total: 2 });
-  recommendationsApi.listFarmRecommendations = async () => ({ items: mockRecsForHist, total: 1 });
+  recommendationsApi.listFarmRecommendations = async () => ({ items: mockRecsForHist, total: 3 });
   observationsApi.fetchAllFarmObservations = async () => ({ items: mockObsForHist, total: 2, isPartial: false });
 
   const historyResult = await historyApi.getUnifiedFarmHistory('farm-123');
 
-  assert(historyResult.items.length === 4, 'History aggregated 4 valid events (invalid timestamp excluded)');
+  assert(historyResult.items.length === 6, 'History aggregated 6 valid events across all statuses (invalid timestamp excluded)');
   
   const invalidEvent = historyResult.items.find(h => h.id === 'irr-invalid-time');
   assert(invalidEvent === undefined, 'Omitted record lacking valid timestamp (no new Date() fallback)');
@@ -412,12 +450,16 @@ async function runTestSuite() {
   assert(historyResult.items[0].id === 'obs-h-1', 'Newest event is obs-h-1 (Nov 7 10:00)');
   assert(historyResult.items[1].id === 'obs-null-value', 'Second event is obs-null-value (Nov 7 09:00)');
   assert(historyResult.items[2].id === 'rec-h-applied', 'Third event is rec-h-applied (Nov 6 08:00)');
-  assert(historyResult.items[3].id === 'irr-1', 'Fourth event is irr-1 (Nov 5 06:00)');
+  assert(historyResult.items[3].id === 'rec-h-superseded', 'Fourth event is rec-h-superseded (Nov 5 12:00)');
+  assert(historyResult.items[4].id === 'rec-h-completed', 'Fifth event is rec-h-completed (Nov 5 08:00)');
+  assert(historyResult.items[5].id === 'irr-1', 'Sixth event is irr-1 (Nov 5 06:00)');
 
   // Verify historical recommendations of all statuses are preserved in history
   const appliedRecHist = historyResult.items.find(h => h.id === 'rec-h-applied');
   assert(appliedRecHist !== undefined, 'Applied recommendation is preserved in activity history');
   assert(appliedRecHist.status === 'applied', 'Recommendation reflects current status only (no fabricated transition events)');
+  assert(historyResult.items.some(h => h.id === 'rec-h-superseded'), 'Superseded recommendation is preserved in activity history');
+  assert(historyResult.items.some(h => h.id === 'rec-h-completed'), 'Completed recommendation is preserved in activity history');
 
   // Verify null observation value is preserved and not coerced to 0
   const nullObsEvent = historyResult.items.find(h => h.id === 'obs-null-value');
@@ -437,7 +479,7 @@ async function runTestSuite() {
 
   assert(partialHistory.isPartialData === true, 'isPartialData is flagged true on source failure');
   assert(typeof partialHistory.sourceErrors.observations === 'string', 'sourceErrors.observations captures failure message');
-  assert(partialHistory.items.length === 2, 'Successful sources (irrigation & recommendations) preserved despite observations failure');
+  assert(partialHistory.items.length === 4, 'Successful sources (irrigation & recommendations) preserved despite observations failure');
 
   // -----------------------------------------------------------------------------
   // 9. AbortController Signal Cancellation

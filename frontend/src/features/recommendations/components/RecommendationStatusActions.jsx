@@ -15,7 +15,7 @@
  */
 
 import React, { useState } from 'react';
-import { CheckCircle2, XCircle, AlertCircle, Loader2, RotateCcw, ShieldCheck, Check } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle, AlertOctagon, Loader2, RotateCcw, ShieldCheck, Check } from 'lucide-react';
 
 export default function RecommendationStatusActions({
   currentStatus = 'pending',
@@ -35,6 +35,8 @@ export default function RecommendationStatusActions({
   const isAcknowledged = normStatus === 'accepted' || normStatus === 'acknowledged';
   const isApplied = normStatus === 'applied' || normStatus === 'completed';
   const isDismissed = normStatus === 'dismissed' || normStatus === 'rejected';
+  const isExpired = normStatus === 'expired';
+  const isSuperseded = normStatus === 'superseded';
 
   const handleExecuteStatusChange = async (target) => {
     if (!onUpdateStatus) return;
@@ -391,6 +393,94 @@ export default function RecommendationStatusActions({
                   </div>
                   <div style={{ fontSize: '11px', color: '#94A3B8' }}>
                     {isMarathi ? 'शेतकऱ्याने हा सल्ला न राबवण्याचा निर्णय घेतला.' : 'Farmer chose not to apply this advisory.'}
+                  </div>
+                </div>
+              </div>
+
+              {isDemoMode && (
+                <button
+                  onClick={() => setConfirmingTarget('pending')}
+                  className="glass-pill"
+                  style={{
+                    fontSize: '11px',
+                    color: '#FBBF24',
+                    border: '1px solid rgba(251, 191, 36, 0.4)',
+                    cursor: 'pointer',
+                  }}
+                  title={isMarathi ? 'पुन्हा प्रलंबित करा' : 'Reset to Pending'}
+                >
+                  <RotateCcw size={11} />
+                  <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Expired Status View */}
+          {isExpired && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                background: 'rgba(248, 113, 113, 0.12)',
+                border: '1px solid rgba(248, 113, 113, 0.35)',
+                borderRadius: '12px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertOctagon size={18} color="#F87171" />
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#FCA5A5' }}>
+                    {isMarathi ? 'सल्ला कालबाह्य झाला आहे (Expired)' : 'Recommendation Expired'}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#F87171' }}>
+                    {isMarathi ? 'या सल्ल्याची मुदत संपली असून तो आता लागू करता येणार नाही.' : 'This advisory has expired and can no longer be applied.'}
+                  </div>
+                </div>
+              </div>
+
+              {isDemoMode && (
+                <button
+                  onClick={() => setConfirmingTarget('pending')}
+                  className="glass-pill"
+                  style={{
+                    fontSize: '11px',
+                    color: '#FBBF24',
+                    border: '1px solid rgba(251, 191, 36, 0.4)',
+                    cursor: 'pointer',
+                  }}
+                  title={isMarathi ? 'पुन्हा प्रलंबित करा' : 'Reset to Pending'}
+                >
+                  <RotateCcw size={11} />
+                  <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Superseded Status View */}
+          {isSuperseded && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 14px',
+                background: 'rgba(192, 132, 252, 0.12)',
+                border: '1px solid rgba(192, 132, 252, 0.35)',
+                borderRadius: '12px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertCircle size={18} color="#C084FC" />
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#E9D5FF' }}>
+                    {isMarathi ? 'अधिक नवीन सल्ला उपलब्ध आहे (Superseded)' : 'Recommendation Superseded'}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#C084FC' }}>
+                    {isMarathi ? 'या सल्ल्याच्या जागी अधिक अद्ययावत शिफारस आलेली आहे.' : 'This advisory has been replaced by a newer recommendation.'}
                   </div>
                 </div>
               </div>
