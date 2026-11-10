@@ -888,16 +888,20 @@ def _build_agronomist_explanation(
     # Multimodal stress domain indicators
     domain_stress: Dict[str, Any] = {}
     if stress_assessment is not None:
-        for domain, status in stress_assessment.domain_statuses.items():
-            domain_stress[domain] = {
-                "status": status.value if hasattr(status, "value") else str(status),
-            }
+        domain_items = getattr(stress_assessment, "domain_statuses", None)
+        if domain_items is None and hasattr(stress_assessment, "domain_assessments"):
+            domain_items = {d: getattr(ev, "status", ev) for d, ev in stress_assessment.domain_assessments.items()}
+        if domain_items:
+            for domain, status in domain_items.items():
+                domain_stress[domain] = {
+                    "status": status.value if hasattr(status, "value") else str(status),
+                }
         if stress_assessment.vegetation_indicators:
             vi = stress_assessment.vegetation_indicators
             domain_stress["vegetation_metrics"] = {
-                "ndvi": vi.ndvi,
-                "ndmi": vi.ndmi,
-                "canopy_cover_fraction": vi.canopy_cover_fraction,
+                "ndvi": getattr(vi, "ndvi_mean", getattr(vi, "ndvi", None)),
+                "ndmi": getattr(vi, "ndmi_mean", getattr(vi, "ndmi", None)),
+                "canopy_cover_fraction": getattr(vi, "vegetation_coverage_fraction", getattr(vi, "canopy_cover_fraction", None)),
             }
 
     # Satellite quality

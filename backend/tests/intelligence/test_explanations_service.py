@@ -719,3 +719,103 @@ def test_split_depth_display_precision_conservation_multilingual():
     assert dec_nonsplit.split_application_required is False
     assert "61.1 mm gross irrigation" in expl_nonsplit.short_summary
     assert "Apply 61.1 mm gross irrigation" in expl_nonsplit.action_guidance
+
+
+def test_explanation_with_multimodal_features_end_to_end():
+    """Verify that build_zone_explanation functions correctly when passed a populated MultimodalZoneFeatureSet."""
+    from backend.app.intelligence.features.feature_builder import build_zone_feature_set
+    from backend.app.intelligence.features.crop import CropFeatures
+    from backend.app.intelligence.features.soil import SoilFeatures
+    from backend.app.intelligence.features.vegetation import ZoneVegetationFeatures
+    from backend.app.intelligence.features.weather import WeatherFeatures
+    from backend.app.intelligence.types import DataQualityStatus, ProvenanceType, SoilTextureClass
+    from backend.app.intelligence.stress.assessment import assess_zone_stress
+
+    now_utc = datetime(2026, 7, 15, 12, 0, tzinfo=timezone.utc)
+    zone = FarmZoneContext(farm_id="farm-multi", zone_id="z-multi", application_efficiency=0.90, zone_area_ha=2.0)
+    wb = _make_test_wb(dr=65.0, raw=50.0, taw=100.0, ks=0.80)
+
+    veg_feat = ZoneVegetationFeatures(
+        zone_id="z-multi",
+        scene_id="S2A_TEST_SCENE",
+        source_provider="Copernicus Sentinel-2",
+        observed_at=now_utc,
+        provenance_type=ProvenanceType.SATELLITE_DERIVED,
+        total_pixels_in_geometry=100,
+        valid_vegetation_pixel_count=95,
+        valid_observation_fraction=0.95,
+        ndvi_mean=0.68,
+        ndmi_mean=0.32,
+        cloud_fraction=0.05,
+        quality_status=DataQualityStatus.GOOD,
+    )
+    weather_feat = WeatherFeatures(
+        source_provider="Open-Meteo",
+        provenance_type=ProvenanceType.PROVIDER_MODELLED,
+        window_start=now_utc - timedelta(days=1),
+        window_end=now_utc,
+        observed_at=now_utc,
+        precipitation_mm=0.0,
+        temperature_mean_c=25.0,
+        temperature_max_c=34.0,
+        relative_humidity_mean_pct=55.0,
+        wind_speed_mean_m_s=2.5,
+        quality_status=DataQualityStatus.GOOD,
+    )
+    soil_feat = SoilFeatures(
+        source_provider="In-situ probe",
+        provenance_type=ProvenanceType.SENSOR_MEASURED,
+        observed_at=now_utc,
+        soil_moisture_m3_m3=0.22,
+        field_capacity_m3_m3=0.34,
+        wilting_point_m3_m3=0.17,
+        soil_texture=SoilTextureClass.CLAY_LOAM,
+        soil_ph=7.2,
+        electrical_conductivity_ds_m=0.8,
+        quality_status=DataQualityStatus.GOOD,
+    )
+    crop_feat = CropFeatures(
+        crop_type="sugarcane",
+        growth_stage="mid_season",
+        observed_at=now_utc,
+        quality_status=DataQualityStatus.GOOD,
+    )
+
+    mfs = build_zone_feature_set(
+        zone_id="z-multi",
+        farm_id="farm-multi",
+        as_of_time=now_utc,
+        vegetation_features=veg_feat,
+        weather_features=weather_feat,
+        soil_features=soil_feat,
+        crop_features=crop_feat,
+    )
+    stress = assess_zone_stress(
+        zone_id="z-multi",
+        farm_id="farm-multi",
+        water_balance=wb,
+        vegetation_features=veg_feat,
+        weather_features=weather_feat,
+        soil_features=soil_feat,
+        as_of_time=now_utc,
+    )
+    decision = evaluate_zone_decision(farm_zone=zone, water_balance=wb, stress_assessment=stress, as_of_time=now_utc)
+
+    # Generate explanations across EN, MR, HI
+    for lang in [ExplanationLanguage.EN, ExplanationLanguage.MR, ExplanationLanguage.HI]:
+        expl = build_zone_explanation(
+            decision=decision,
+            water_balance=wb,
+            stress_assessment=stress,
+            features=mfs,
+            farm_zone=zone,
+            language=lang,
+        )
+        assert expl.action == DecisionAction.IRRIGATE
+        assert expl.short_summary is not None
+        assert expl.agronomist_explanation is not None
+        # Check that satellite and soil measurements are correctly extracted
+        assert expl.relevant_measurements.get("satellite_ndvi") == 0.68
+        assert expl.relevant_measurements.get("soil_ph") == 7.2
+        assert expl.relevant_measurements.get("soil_salinity_ece_ds_m") == 0.8
+

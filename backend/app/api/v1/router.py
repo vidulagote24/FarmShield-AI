@@ -5,6 +5,7 @@ from app.api.v1.endpoints import (
     auth,
     farms,
     health,
+    ingestion,
     irrigation,
     observations,
     recommendations,
@@ -23,3 +24,4 @@ api_router.include_router(zones.router)
 api_router.include_router(observations.router)
 api_router.include_router(recommendations.router)
 api_router.include_router(irrigation.router)
+api_router.include_router(ingestion.router)
