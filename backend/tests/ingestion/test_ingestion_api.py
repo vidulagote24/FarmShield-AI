@@ -7,10 +7,13 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.api.v1.endpoints.ingestion import pipeline
 from app.core.security import create_access_token, get_password_hash
+from app.ingestion.providers.base import ProviderFetchResult
 from app.models.farm import Farm, FarmZone
 from app.models.observation import Observation
 from app.models.user import User
+import unittest.mock
 
 
 @pytest.fixture(autouse=True)
@@ -338,14 +341,39 @@ def test_satellite_ingestion_bbox_and_ownership_validation(
     assert db_session.query(Observation).count() == initial_obs_count
 
     # 10. Bbox fully inside farm boundary succeeds
-    resp = client.post("/api/v1/ingestion/satellite", json={
-        "farm_id": farmer_a_farm_id,
-        "bbox": [73.852, 18.522, 73.858, 18.528],
-        "start_date": "2024-10-01",
-        "end_date": "2024-10-05",
-    }, headers=auth_setup["headers_a"])
-    assert resp.status_code == 200
-    assert resp.json()["status"] == "success"
+    mock_stac_result = ProviderFetchResult(
+        provider_name="Copernicus Sentinel-2 L2A (STAC)",
+        endpoint_url=pipeline.satellite_provider.STAC_SEARCH_URL,
+        retrieved_at=datetime.now(timezone.utc),
+        status_code=200,
+        payload={
+            "features": [
+                {
+                    "type": "Feature",
+                    "id": "S2A_TEST_SCENE_01",
+                    "properties": {
+                        "datetime": "2024-10-02T05:30:00Z",
+                        "eo:cloud_cover": 5.0,
+                        "platform": "Sentinel-2A",
+                    },
+                    "assets": {
+                        "red": {"href": "https://example.com/B04.tif"},
+                        "nir": {"href": "https://example.com/B08.tif"},
+                    },
+                }
+            ]
+        },
+        is_live=False,
+    )
+    with unittest.mock.patch.object(pipeline.satellite_provider, "search_scenes", return_value=mock_stac_result):
+        resp = client.post("/api/v1/ingestion/satellite", json={
+            "farm_id": farmer_a_farm_id,
+            "bbox": [73.852, 18.522, 73.858, 18.528],
+            "start_date": "2024-10-01",
+            "end_date": "2024-10-05",
+        }, headers=auth_setup["headers_a"])
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "success"
 
 
 def test_satellite_ingestion_non_finite_bbox_coordinates(
