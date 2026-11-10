@@ -87,3 +87,4 @@ def test_ingest_soil_reading_api_flow(auth_client: TestClient, db_session, sampl
     assert obs.observation_type == "soil_moisture"
     assert obs.value == 0.32
     assert obs.unit == "m³/m³"
+

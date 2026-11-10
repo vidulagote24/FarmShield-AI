@@ -390,7 +390,7 @@ def build_evidence_inventory(
                         value=round(float(veg.ndvi_mean), 3),
                         unit="index",
                         source_provider=veg.source_provider or "Copernicus Sentinel-2",
-                        observation_timestamp=veg.observation_timestamp,
+                        observation_timestamp=getattr(veg, "observed_at", getattr(veg, "observation_timestamp", None)),
                         evidence_type=EvidenceType.SATELLITE_DERIVED,
                         quality_status=veg_quality,
                         notes="Zone-averaged Normalized Difference Vegetation Index.",
@@ -409,16 +409,19 @@ def build_evidence_inventory(
             w = features.weather
             if w.temperature_max_c is not None:
                 relevant_measurements["weather_max_temperature_c"] = round(float(w.temperature_max_c), 1)
-            if w.vapor_pressure_deficit_kpa is not None:
-                relevant_measurements["vapor_pressure_deficit_kpa"] = round(float(w.vapor_pressure_deficit_kpa), 2)
+            vpd = getattr(w, "vapor_pressure_deficit_kpa", None)
+            if vpd is not None:
+                relevant_measurements["vapor_pressure_deficit_kpa"] = round(float(vpd), 2)
 
         # Soil Features
         if features.soil is not None:
             s = features.soil
-            if s.electrical_conductivity_e_ce is not None:
-                relevant_measurements["soil_salinity_ece_ds_m"] = round(float(s.electrical_conductivity_e_ce), 2)
-            if s.ph is not None:
-                relevant_measurements["soil_ph"] = round(float(s.ph), 2)
+            ec = getattr(s, "electrical_conductivity_ds_m", getattr(s, "electrical_conductivity_e_ce", None))
+            if ec is not None:
+                relevant_measurements["soil_salinity_ece_ds_m"] = round(float(ec), 2)
+            ph = getattr(s, "soil_ph", getattr(s, "ph", None))
+            if ph is not None:
+                relevant_measurements["soil_ph"] = round(float(ph), 2)
 
     # --------------------------------------------------------------------------
     # 5. Decision Output Quantities (Phase 5)
