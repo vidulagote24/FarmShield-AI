@@ -27,6 +27,7 @@ export default function IrrigationPlannerPage({
   initialZoneId = null,
   currentLang = 'mr',
   onBack,
+  onSelectRecommendation,
 }) {
   const isMarathi = currentLang === 'mr';
 
@@ -276,6 +277,7 @@ export default function IrrigationPlannerPage({
                   zone={matchingZone}
                   onOpenRecordForm={handleOpenRecordForm}
                   onToggleDetails={() => handleToggleDetails(rec.zone_id)}
+                  onSelectRecommendation={onSelectRecommendation}
                   showDetails={isDetailsExpanded}
                   currentLang={currentLang}
                 />

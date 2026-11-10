@@ -29,6 +29,7 @@ export default function ZoneDetailsPage({
   currentLang = 'mr',
   onBack,
   onNavigateIrrigationPlanner,
+  onSelectRecommendation,
 }) {
   const isMarathi = currentLang === 'mr';
 
@@ -247,6 +248,7 @@ export default function ZoneDetailsPage({
       <RecommendationSummary
         recommendations={recommendations}
         onNavigateIrrigationPlanner={onNavigateIrrigationPlanner}
+        onSelectRecommendation={onSelectRecommendation}
         currentLang={currentLang}
       />
     </div>

@@ -12,6 +12,8 @@ import Profile from './pages/Profile';
 import FarmMapPage from './features/farm-map/pages/FarmMapPage';
 import ZoneDetailsPage from './features/zones/pages/ZoneDetailsPage';
 import IrrigationPlannerPage from './features/irrigation/pages/IrrigationPlannerPage';
+import RecommendationDetailsPage from './features/recommendations/pages/RecommendationDetailsPage';
+import FarmInsightsPage from './features/insights/pages/FarmInsightsPage';
 import { Smartphone, Monitor } from 'lucide-react';
 
 export default function App() {
@@ -19,14 +21,19 @@ export default function App() {
   const paramScreen = urlParams?.get('screen');
   const paramTab = urlParams?.get('tab');
   const paramZone = urlParams?.get('zone');
+  const paramRec = urlParams?.get('rec');
 
   const [currentLang, setCurrentLang] = useState('mr'); // default to Marathi
   const [currentScreen, setCurrentScreen] = useState(paramScreen || 'main'); // 'welcome' | 'register' | 'farm_setup' | 'main'
-  const [activeTab, setActiveTab] = useState(paramTab || 'zone_details'); // 'dashboard' | 'irrigation' | 'crops' | 'profile' | 'farm_map' | 'zone_details'
+  const [activeTab, setActiveTab] = useState(paramTab || 'zone_details'); // 'dashboard' | 'irrigation' | 'crops' | 'profile' | 'farm_map' | 'zone_details' | 'recommendation_details'
   
   // Active selected zone context for Zone Intelligence inspection
   const [selectedZoneId, setSelectedZoneId] = useState(paramZone || 'z3-south-west-003');
   const [selectedFarmId, setSelectedFarmId] = useState(null);
+
+  // Active recommendation context for Recommendation Details deep-dive
+  const [selectedRecId, setSelectedRecId] = useState(paramRec || 'rec-c-03');
+  const [originatingTab, setOriginatingTab] = useState('zone_details');
   
   // Responsive frame toggle for desktop preview
   const [isPhoneFrame, setIsPhoneFrame] = useState(true);
@@ -98,6 +105,18 @@ export default function App() {
         subtitle: currentLang === 'mr' ? 'विभाग बुद्धिमत्ता व विश्लेषण' : 'Zone Intelligence & Details'
       };
     }
+    if (activeTab === 'recommendation_details') {
+      return {
+        title: 'FarmShield AI',
+        subtitle: currentLang === 'mr' ? 'सल्ला विश्लेषण व निर्णय पुरावा' : 'Recommendation Details & Evidence'
+      };
+    }
+    if (activeTab === 'insights') {
+      return {
+        title: 'FarmShield AI',
+        subtitle: currentLang === 'mr' ? 'शेत कल व विश्लेषण' : 'Farm Insights & Historical Trends'
+      };
+    }
     return { title: 'FarmShield AI' };
   };
 
@@ -111,15 +130,15 @@ export default function App() {
           <span>🌾</span> FarmShield AI Glassmorphic Preview
         </span>
         <button
-          onClick={() => setActiveTab(activeTab === 'farm_map' || activeTab === 'zone_details' ? 'dashboard' : 'farm_map')}
+          onClick={() => setActiveTab(activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' ? 'dashboard' : 'farm_map')}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '5px',
-            background: activeTab === 'farm_map' || activeTab === 'zone_details' ? 'rgba(197, 243, 107, 0.25)' : 'rgba(255, 255, 255, 0.12)',
+            background: activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' ? 'rgba(197, 243, 107, 0.25)' : 'rgba(255, 255, 255, 0.12)',
             backdropFilter: 'blur(10px)',
-            color: activeTab === 'farm_map' || activeTab === 'zone_details' ? '#C5F36B' : '#FFFFFF',
-            border: activeTab === 'farm_map' || activeTab === 'zone_details' ? '1px solid #C5F36B' : '1px solid rgba(255, 255, 255, 0.2)',
+            color: activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' ? '#C5F36B' : '#FFFFFF',
+            border: activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' ? '1px solid #C5F36B' : '1px solid rgba(255, 255, 255, 0.2)',
             padding: '5px 12px',
             borderRadius: '16px',
             fontSize: '11.5px',
@@ -128,7 +147,27 @@ export default function App() {
             transition: 'all 0.2s ease',
           }}
         >
-          <span>🗺️ {activeTab === 'farm_map' || activeTab === 'zone_details' ? (currentLang === 'mr' ? 'डॅशबोर्ड' : 'Dashboard') : (currentLang === 'mr' ? 'नकाशा' : 'Farm Map')}</span>
+          <span>🗺️ {activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' ? (currentLang === 'mr' ? 'डॅशबोर्ड' : 'Dashboard') : (currentLang === 'mr' ? 'नकाशा' : 'Farm Map')}</span>
+        </button>
+        <button
+          onClick={() => setActiveTab(activeTab === 'insights' ? 'dashboard' : 'insights')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            background: activeTab === 'insights' ? 'rgba(56, 189, 248, 0.25)' : 'rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(10px)',
+            color: activeTab === 'insights' ? '#38BDF8' : '#FFFFFF',
+            border: activeTab === 'insights' ? '1px solid #38BDF8' : '1px solid rgba(255, 255, 255, 0.2)',
+            padding: '5px 12px',
+            borderRadius: '16px',
+            fontSize: '11.5px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <span>📈 {activeTab === 'insights' ? (currentLang === 'mr' ? 'डॅशबोर्ड' : 'Dashboard') : (currentLang === 'mr' ? 'कल विश्लेषण' : 'Insights')}</span>
         </button>
         <button
           onClick={() => setIsPhoneFrame(!isPhoneFrame)}
@@ -178,12 +217,14 @@ export default function App() {
         <Header
           title={headerInfo.title}
           subtitle={headerInfo.subtitle}
-          showBack={currentScreen === 'register' || currentScreen === 'farm_setup' || activeTab === 'farm_map' || activeTab === 'zone_details'}
+          showBack={currentScreen === 'register' || currentScreen === 'farm_setup' || activeTab === 'farm_map' || activeTab === 'zone_details' || activeTab === 'recommendation_details' || activeTab === 'insights'}
           onBack={() => {
             if (currentScreen === 'register') setCurrentScreen('welcome');
             else if (currentScreen === 'farm_setup') setCurrentScreen('register');
+            else if (activeTab === 'recommendation_details') setActiveTab(originatingTab || 'zone_details');
             else if (activeTab === 'zone_details') setActiveTab('farm_map');
             else if (activeTab === 'farm_map') setActiveTab('dashboard');
+            else if (activeTab === 'insights') setActiveTab('dashboard');
           }}
           currentLang={currentLang}
           onToggleLang={cycleLanguage}
@@ -240,6 +281,11 @@ export default function App() {
                   initialZoneId={selectedZoneId}
                   currentLang={currentLang}
                   onBack={() => setActiveTab('dashboard')}
+                  onSelectRecommendation={(recId) => {
+                    setSelectedRecId(recId);
+                    setOriginatingTab('irrigation');
+                    setActiveTab('recommendation_details');
+                  }}
                 />
               )}
 
@@ -281,8 +327,34 @@ export default function App() {
                   currentLang={currentLang}
                   onBack={() => setActiveTab('farm_map')}
                   onNavigateIrrigationPlanner={(rec) => {
+                    if (rec?.zone_id) setSelectedZoneId(rec.zone_id);
                     setActiveTab('irrigation');
                   }}
+                  onSelectRecommendation={(recId) => {
+                    setSelectedRecId(recId);
+                    setOriginatingTab('zone_details');
+                    setActiveTab('recommendation_details');
+                  }}
+                />
+              )}
+
+              {activeTab === 'recommendation_details' && (
+                <RecommendationDetailsPage
+                  recommendationId={selectedRecId || 'rec-c-03'}
+                  currentLang={currentLang}
+                  onBack={() => setActiveTab(originatingTab || 'zone_details')}
+                  onNavigateIrrigationPlanner={(rec) => {
+                    if (rec?.zone_id) setSelectedZoneId(rec.zone_id);
+                    setActiveTab('irrigation');
+                  }}
+                />
+              )}
+
+              {activeTab === 'insights' && (
+                <FarmInsightsPage
+                  farmId={selectedFarmId}
+                  currentLang={currentLang}
+                  onBack={() => setActiveTab('dashboard')}
                 />
               )}
             </>

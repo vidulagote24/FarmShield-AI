@@ -20,6 +20,7 @@ export default function IrrigationRecommendationCard({
   zone,
   onOpenRecordForm,
   onToggleDetails,
+  onSelectRecommendation,
   showDetails = false,
   currentLang = 'mr',
 }) {
@@ -171,6 +172,27 @@ export default function IrrigationRecommendationCard({
           >
             <CheckCircle2 size={15} />
             <span>{isMarathi ? 'सिंचन पूर्ण केल्याची नोंद करा' : 'Record Completed Irrigation'}</span>
+          </button>
+        )}
+
+        {onSelectRecommendation && (
+          <button
+            onClick={() => onSelectRecommendation(recommendation.id)}
+            className="btn-glass-secondary"
+            style={{
+              minHeight: '40px',
+              padding: '0 12px',
+              fontSize: '12px',
+              color: '#38BDF8',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              cursor: 'pointer',
+            }}
+            title={isMarathi ? 'सल्ला विश्लेषण' : 'Evidence Details'}
+          >
+            <span>{isMarathi ? 'सल्ला विश्लेषण' : 'Evidence'}</span>
+            <ArrowRight size={14} />
           </button>
         )}
 

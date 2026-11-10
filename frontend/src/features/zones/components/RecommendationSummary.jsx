@@ -47,6 +47,7 @@ const PRIORITY_TOKENS = {
 export default function RecommendationSummary({
   recommendations = [],
   onNavigateIrrigationPlanner,
+  onSelectRecommendation,
   currentLang = 'mr',
 }) {
   const isMarathi = currentLang === 'mr';
@@ -219,22 +220,47 @@ export default function RecommendationSummary({
                   </div>
                 )}
 
-                {/* Optional navigation to Irrigation Planner */}
-                {onNavigateIrrigationPlanner && action.action === 'irrigate' && (
-                  <button
-                    onClick={() => onNavigateIrrigationPlanner(rec)}
-                    className="btn-glass-primary"
-                    style={{
-                      width: '100%',
-                      fontSize: '12px',
-                      padding: '8px 14px',
-                      minHeight: '36px',
-                    }}
-                  >
-                    <span>{isMarathi ? 'सिंचन नियोजन पहा (Plan Irrigation)' : 'Open Irrigation Planner'}</span>
-                    <ArrowRight size={14} />
-                  </button>
-                )}
+                {/* Action Buttons: View Details & Irrigation Planner */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
+                  {onSelectRecommendation && (
+                    <button
+                      onClick={() => onSelectRecommendation(rec.id)}
+                      className="btn-glass-secondary"
+                      style={{
+                        flex: 1,
+                        fontSize: '12px',
+                        padding: '8px 12px',
+                        minHeight: '36px',
+                        color: '#C5F36B',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <span>{isMarathi ? 'सल्ला विश्लेषण (View Evidence)' : 'Advisory Details'}</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  )}
+
+                  {onNavigateIrrigationPlanner && action.action === 'irrigate' && (
+                    <button
+                      onClick={() => onNavigateIrrigationPlanner(rec)}
+                      className="btn-glass-primary"
+                      style={{
+                        flex: 1,
+                        fontSize: '12px',
+                        padding: '8px 12px',
+                        minHeight: '36px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <span>{isMarathi ? 'सिंचन नियोजन (Plan)' : 'Plan Irrigation'}</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}
