@@ -1,0 +1,91 @@
+{
+  "project": "FarmShield AI",
+  "version": "0.1",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "bytes": 6068,
+      "sha256": "c5ac7001ebc6383bf3954da1c52fce6c30229e9d76a6cd69bd94c60a168e397e"
+    },
+    {
+      "path": "README.md",
+      "bytes": 6932,
+      "sha256": "8b95fb79fe4e97348f94d0295d19d6d4182b884492d2b54e4e43d456388674fb"
+    },
+    {
+      "path": "docs/AI_SPEC.md",
+      "bytes": 8880,
+      "sha256": "748224d9252030fe5cb5e3604c4c4f32d3abd61235ba4fdce69eaf26e6b36854"
+    },
+    {
+      "path": "docs/API_CONTRACTS.md",
+      "bytes": 8848,
+      "sha256": "43dd5828c12f453ff3f78fcfd43fe938fc720699da43f140f9e6411c8b3d5e9f"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "bytes": 8996,
+      "sha256": "9154bb2dbda38a76b383c4797b964151b0870d17a95d04ffedb6bf723dd1e453"
+    },
+    {
+      "path": "docs/DATA_MODEL.md",
+      "bytes": 7791,
+      "sha256": "d6d132439ea0cfda73edea8e432a641bad6f87483d3bdb67b4a3211634aa4595"
+    },
+    {
+      "path": "docs/DATA_SOURCES.md",
+      "bytes": 8222,
+      "sha256": "18f991d9569dbe294a9354dd53cfd92f67c33f6b7adc749e05fbf0f82a23641b"
+    },
+    {
+      "path": "docs/DECISIONS.md",
+      "bytes": 5299,
+      "sha256": "56f981e26ef17b5e14f51aace7dce024e495a59c087ecc2209eff7e459e83ad4"
+    },
+    {
+      "path": "docs/DEMO_SCRIPT.md",
+      "bytes": 6506,
+      "sha256": "76dfe4ef29bd54557801dcc0cf9b8e51ca35fbe91575a6006e75eb3b13fb1d42"
+    },
+    {
+      "path": "docs/DESIGN.md",
+      "bytes": 9244,
+      "sha256": "29e737239080050df8ce08a0536be730cb152da3f99235b93b22b4cbf665fe5f"
+    },
+    {
+      "path": "docs/INDEX.md",
+      "bytes": 1249,
+      "sha256": "59de1b414720866b8afd9b11cf9c11aadc768088b41125836fc20e67abd4fcbe"
+    },
+    {
+      "path": "docs/MVP_SCOPE.md",
+      "bytes": 5017,
+      "sha256": "f880813d02a3e579f59a920f7a65b8d6785c85f7dcf24ab5bd074f29926b43f8"
+    },
+    {
+      "path": "docs/PRD.md",
+      "bytes": 8361,
+      "sha256": "749fcaa2f693fd0a75c86829540cbeb1f5a64e42118d5185c49aebdf743286d2"
+    },
+    {
+      "path": "docs/RULES.md",
+      "bytes": 4680,
+      "sha256": "d628ddb92e0ce07be9fe281cdf977760fd87211fb2f241f36d9292413de0e9fe"
+    },
+    {
+      "path": "docs/TASKS.md",
+      "bytes": 6874,
+      "sha256": "3add2f111ab77daaae5de062caee6b0db1a6c49a7ff973449bcf955053136930"
+    },
+    {
+      "path": "docs/TEAM_OWNERSHIP.md",
+      "bytes": 4772,
+      "sha256": "8a1474a5ea4bbfbce53d0eee7b226c73e4d19ef595bd4dc71fd0e4b216451465"
+    },
+    {
+      "path": "docs/TESTING.md",
+      "bytes": 4638,
+      "sha256": "c1240eb628c768d480194482659091aa833f3cb669ece1d67dcc1a50bdf476b5"
+    }
+  ]
+}

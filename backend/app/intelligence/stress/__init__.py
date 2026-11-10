@@ -1,0 +1,100 @@
+"""Multimodal crop and water stress assessment module.
+
+Evaluates independent stress dimensions across root-zone water balance,
+satellite vegetation indices, meteorological evaporative demand, and soil conditions.
+"""
+
+from backend.app.intelligence.stress.assessment import (
+    ZoneStressAssessment,
+    assess_zone_stress,
+)
+from backend.app.intelligence.stress.indicators import (
+    CITATION_FAO39,
+    CITATION_FAO56,
+    CITATION_HEAT_STRESS,
+    CITATION_HEAT_STRESS_COTTON,
+    CITATION_HEAT_STRESS_WHEAT,
+    CITATION_USDA60,
+    CITATION_VPD_DEMAND,
+    CITATION_VPD_DIURNAL_PROXY,
+    CITATION_VPD_FAO56_PAIRED,
+    CITATION_VPD_FAO56_RH_MAX_MIN,
+    CITATION_VPD_FAO56_RH_MEAN,
+    CropStressThresholds,
+    HypothesisTestConvention,
+    SoilConditionIndicators,
+    VegetationHistoricalBaseline,
+    VegetationStressIndicators,
+    VPDCalculationMethod,
+    WaterStressIndicators,
+    WeatherStressIndicators,
+    calculate_soil_condition_indicators,
+    calculate_vapor_pressure_deficit,
+    calculate_vapor_pressure_deficit_diurnal_proxy,
+    calculate_vapor_pressure_deficit_fao56_mean_rh,
+    calculate_vapor_pressure_deficit_fao56_rh_max_min,
+    calculate_vapor_pressure_deficit_paired,
+    calculate_vegetation_stress_indicators,
+    calculate_water_stress_indicators,
+    calculate_weather_stress_indicators,
+    get_student_t_critical_value,
+    resolve_scl_class_2_label,
+    resolve_scl_class_2_semantics,
+)
+from backend.app.intelligence.stress.scoring import (
+    DomainStressEvaluation,
+    StressReasonCode,
+    evaluate_soil_stress_domain,
+    evaluate_vegetation_stress_domain,
+    evaluate_water_stress_domain,
+    evaluate_weather_stress_domain,
+    synthesize_overall_stress_status,
+)
+
+__all__ = [
+    # Main Assessment
+    "ZoneStressAssessment",
+    "assess_zone_stress",
+    # Indicators
+    "WaterStressIndicators",
+    "calculate_water_stress_indicators",
+    "VegetationStressIndicators",
+    "calculate_vegetation_stress_indicators",
+    "WeatherStressIndicators",
+    "calculate_weather_stress_indicators",
+    "calculate_vapor_pressure_deficit",
+    "calculate_vapor_pressure_deficit_paired",
+    "calculate_vapor_pressure_deficit_fao56_rh_max_min",
+    "calculate_vapor_pressure_deficit_fao56_mean_rh",
+    "calculate_vapor_pressure_deficit_diurnal_proxy",
+    "VPDCalculationMethod",
+    "resolve_scl_class_2_label",
+    "resolve_scl_class_2_semantics",
+    "HypothesisTestConvention",
+    "get_student_t_critical_value",
+    "SoilConditionIndicators",
+    "calculate_soil_condition_indicators",
+    "VegetationHistoricalBaseline",
+    "CropStressThresholds",
+    # Scoring & Reason Codes
+    "DomainStressEvaluation",
+    "StressReasonCode",
+    "evaluate_water_stress_domain",
+    "evaluate_vegetation_stress_domain",
+    "evaluate_weather_stress_domain",
+    "evaluate_soil_stress_domain",
+    "synthesize_overall_stress_status",
+    # Citations
+    "CITATION_FAO56",
+    "CITATION_FAO39",
+    "CITATION_USDA60",
+    "CITATION_HEAT_STRESS",
+    "CITATION_HEAT_STRESS_WHEAT",
+    "CITATION_HEAT_STRESS_COTTON",
+    "CITATION_VPD_DEMAND",
+    "CITATION_VPD_FAO56_PAIRED",
+    "CITATION_VPD_FAO56_RH_MAX_MIN",
+    "CITATION_VPD_FAO56_RH_MEAN",
+    "CITATION_VPD_DIURNAL_PROXY",
+]
+

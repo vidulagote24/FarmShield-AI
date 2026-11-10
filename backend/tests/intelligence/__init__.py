@@ -1,0 +1,2 @@
+"""Intelligence module test package."""
+

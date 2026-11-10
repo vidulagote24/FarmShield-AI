@@ -1,31 +1,47 @@
 # Python virtual environments & bytecode
 .venv/
 venv/
+ENV/
 env/
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Environment variables & credentials
+# Environment variables, credentials & secrets
 .env
+.env.local
 *.env.local
 *.env.*.local
+*.pem
+*.key
 
 # Testing & Coverage
 .pytest_cache/
 .coverage
 htmlcov/
+.mypy_cache/
+.ruff_cache/
 .tox/
 .nox/
 
-# IDE & OS files
+# Operating System & IDE files
+.DS_Store
+Thumbs.db
 .vscode/
 .idea/
 *.swp
 *.swo
-.DS_Store
-Thumbs.db
 
 # Docker & Database persistence
 postgres_data/
+
+# Node / Frontend build artifacts
+node_modules/
+dist/
+build/
+.npm
+
+# Temporary / scratch / logs
+tmp/
 *.log
+.agents/
