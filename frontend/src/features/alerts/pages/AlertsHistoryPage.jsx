@@ -394,14 +394,14 @@ export default function AlertsHistoryPage({
                 />
               ))}
             </div>
-          ) : (
+          ) : !error ? (
             <AlertsEmptyState
               type={alerts.length === 0 ? 'alerts' : 'filter_empty'}
               currentLang={currentLang}
               onResetFilter={() => setPriorityFilter('all')}
               onRefresh={refresh}
             />
-          )}
+          ) : null}
         </div>
       )}
 
@@ -416,13 +416,13 @@ export default function AlertsHistoryPage({
               sourceErrors={sourceErrors}
               onSelectRecommendation={onSelectRecommendation}
             />
-          ) : (
+          ) : !error ? (
             <AlertsEmptyState
               type="history"
               currentLang={currentLang}
               onRefresh={refresh}
             />
-          )}
+          ) : null}
         </div>
       )}
     </div>
