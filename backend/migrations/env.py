@@ -61,6 +61,7 @@ def run_migrations_offline() -> None:
     )
 
     with context.begin_transaction():
+        context.execute("SET search_path TO public, extensions;")
         context.run_migrations()
 
 
@@ -70,8 +71,9 @@ def run_migrations_online() -> None:
     import sqlalchemy as sa
 
     with engine.connect() as connection:
-        # Enforce search_path to public so PostGIS tiger/topology schemas are not reflected
-        connection.execute(sa.text("SET search_path TO public;"))
+        # Enforce search_path to public and extensions so PostGIS functions and GeoAlchemy2 geometry types
+        # resolve properly in standard PostGIS and Supabase setups (where PostGIS is installed in extensions schema)
+        connection.execute(sa.text("SET search_path TO public, extensions;"))
         connection.commit()
 
         context.configure(

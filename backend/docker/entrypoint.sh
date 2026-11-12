@@ -9,5 +9,6 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ] || [ "${RUN_MIGRATIONS:-true}" = "1" ]
 fi
 
 # Execute Uvicorn replacing the shell process for proper POSIX signal handling
-echo "[Railway Entrypoint] Starting Uvicorn on 0.0.0.0:${PORT:-8000}..."
-exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}"
+echo "[Entrypoint] Starting Uvicorn on 0.0.0.0:${PORT:-10000}..."
+exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-10000}"
+

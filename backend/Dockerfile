@@ -33,12 +33,12 @@ RUN groupadd -r farmshield && useradd -r -g farmshield farmshield && \
 
 USER farmshield
 
-# Expose FastAPI default port
-EXPOSE 8000
+# Expose Render default port
+EXPOSE 10000
 
 # Container healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -fsS "http://127.0.0.1:${PORT:-10000}/health" || exit 1
 
-# Run entrypoint script handling optional migrations and Uvicorn on dynamic $PORT
-CMD ["sh", "./docker/entrypoint.sh"]
+# Run Uvicorn ASGI server with dynamic $PORT support (Render defaults to 10000)
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
