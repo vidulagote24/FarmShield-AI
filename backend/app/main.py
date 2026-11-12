@@ -2,7 +2,7 @@
 
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator, Dict
-from fastapi import FastAPI, status
+from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.endpoints.health import get_health
 from app.api.v1.router import api_router
@@ -80,6 +80,6 @@ def root_service_info() -> Dict[str, Any]:
     tags=["Health"],
     status_code=status.HTTP_200_OK,
 )
-def root_health() -> Dict[str, Any]:
+def root_health(response: Response) -> Dict[str, Any]:
     """Top-level health check endpoint for orchestrators and container probes."""
-    return get_health()
+    return get_health(response=response)

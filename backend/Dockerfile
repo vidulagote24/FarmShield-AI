@@ -23,10 +23,12 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy backend application code and migration scripts
 COPY app ./app
 COPY migrations ./migrations
+COPY docker ./docker
 COPY alembic.ini .
 
 # Create non-root system user for security
 RUN groupadd -r farmshield && useradd -r -g farmshield farmshield && \
+    chmod +x ./docker/entrypoint.sh && \
     chown -R farmshield:farmshield /app
 
 USER farmshield
@@ -36,7 +38,7 @@ EXPOSE 8000
 
 # Container healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
-# Run Uvicorn ASGI server
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run entrypoint script handling optional migrations and Uvicorn on dynamic $PORT
+CMD ["sh", "./docker/entrypoint.sh"]

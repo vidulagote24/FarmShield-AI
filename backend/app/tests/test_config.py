@@ -18,6 +18,19 @@ def test_cors_origin_parsing() -> None:
     test_settings = Settings(BACKEND_CORS_ORIGINS="http://localhost:3000,http://example.com")
     assert "http://localhost:3000" in test_settings.BACKEND_CORS_ORIGINS
     assert "http://example.com" in test_settings.BACKEND_CORS_ORIGINS
+    assert "https://farmfield-ai.vercel.app" in settings.BACKEND_CORS_ORIGINS
+
+
+def test_database_url_normalization() -> None:
+    """Verify that postgres:// and postgresql:// are normalized to postgresql+psycopg://."""
+    s1 = Settings(DATABASE_URL="postgres://user:pass@host:5432/db")
+    assert s1.DATABASE_URL == "postgresql+psycopg://user:pass@host:5432/db"
+
+    s2 = Settings(DATABASE_URL="postgresql://user:pass@host:5432/db")
+    assert s2.DATABASE_URL == "postgresql+psycopg://user:pass@host:5432/db"
+
+    s3 = Settings(DATABASE_URL="postgresql+psycopg://user:pass@host:5432/db")
+    assert s3.DATABASE_URL == "postgresql+psycopg://user:pass@host:5432/db"
 
 
 def test_secrets_redacted_in_repr() -> None:

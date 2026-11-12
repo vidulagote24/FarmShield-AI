@@ -49,7 +49,21 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
+        "https://farmfield-ai.vercel.app",
     ]
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def assemble_db_connection(cls, v: str) -> str:
+        """Ensure standard postgresql:// or postgres:// URLs use psycopg3 driver."""
+        if isinstance(v, str):
+            v_trimmed = v.strip()
+            if v_trimmed.startswith("postgres://"):
+                return v_trimmed.replace("postgres://", "postgresql+psycopg://", 1)
+            if v_trimmed.startswith("postgresql://") and not v_trimmed.startswith("postgresql+"):
+                return v_trimmed.replace("postgresql://", "postgresql+psycopg://", 1)
+            return v_trimmed
+        return v
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="after")
     @classmethod
